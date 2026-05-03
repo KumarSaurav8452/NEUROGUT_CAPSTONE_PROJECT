@@ -232,9 +232,7 @@ __pycache__/
 
 # ML models (optional but recommended)
 *.pkl
-
-# Data files (if large)
-data/
+/plots
 
 # OS files
 .DS_Store
