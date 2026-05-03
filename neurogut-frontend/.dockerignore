@@ -1,0 +1,6 @@
+# Frontend Docker ignores
+node_modules/
+.next/
+.git/
+.gitignore
+*.md

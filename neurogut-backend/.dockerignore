@@ -1,0 +1,13 @@
+# Backend Docker ignores
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+.venv/
+venv/
+db/neurogut.db
+reports/*.pdf
+tests/
+.git/
+.gitignore

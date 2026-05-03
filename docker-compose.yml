@@ -1,0 +1,68 @@
+# =============================================================
+# NEUROGUT -- Docker Compose
+# =============================================================
+# Usage:
+#   docker-compose up --build        (first time / after changes)
+#   docker-compose up -d             (detached)
+#   docker-compose down              (stop)
+#   docker-compose logs -f backend   (tail logs)
+# =============================================================
+
+services:
+  # --- Backend (FastAPI + ML Model) ---
+  backend:
+    build:
+      context: ./neurogut-backend
+      dockerfile: Dockerfile
+    container_name: neurogut-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend-data:/app/db
+      - backend-reports:/app/reports
+    environment:
+      - DATABASE_URL=sqlite:////app/db/neurogut.db
+      - JWT_SECRET=neurogut-docker-secret-change-in-prod
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # --- Frontend (Next.js) ---
+  frontend:
+    build:
+      context: ./neurogut-frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: neurogut-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    restart: unless-stopped
+
+  # --- Nginx Reverse Proxy ---
+  nginx:
+    image: nginx:alpine
+    container_name: neurogut-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+    driver: local
+  backend-reports:
+    driver: local

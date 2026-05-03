@@ -1,0 +1,711 @@
+NEUROGUT
+Gut-Brain Axis Diagnostic Platform
+Product Requirements Document (PRD)
+Version
+1.0.0 — May 2025
+Project
+NEUROGUT Capstone
+End User
+Hospital Clinicians & Researchers
+Model Type
+Multi-label ML (RF + XGB Stacked Ensemble)
+1. Project Overview & Problem Statement
+1.1 What is NEUROGUT?
+NEUROGUT is an AI-powered clinical decision support platform that analyzes gut microbiome composition to predict neuropsychiatric conditions — specifically Depression and Anxiety — via the Gut-Brain Axis (GBA). It is designed as a hospital-facing SaaS tool that enables clinicians, gastroenterologists, and psychiatrists to submit a patient's microbiome sample data and receive a multi-label probability prediction, biomarker explanation, and clinical risk report.
+1.2 The Clinical Problem
+Current psychiatric diagnosis relies heavily on subjective self-reporting (PHQ-9, GAD-7) and clinical interviews. No objective biomarker-based test exists at the point of care for Depression or Anxiety. Emerging research in the gut-brain axis demonstrates that gut microbiota composition is directly correlated with neuropsychiatric states. NEUROGUT bridges this gap.
+Key challenges the platform addresses:
+Lack of objective biomarker-driven psychiatric screening tools in clinical settings
+High comorbidity rate between Depression and Anxiety (45-75% overlap) — existing tools treat them as separate binary diagnoses
+Clinicians lack interpretability tools to understand which bacterial taxa drive a given prediction
+No standardized gut microbiome reporting workflow exists in hospital IT systems
+1.3 The Solution
+NEUROGUT provides a three-layer clinical value stack:
+Layer
+Capability
+Clinical Benefit
+Prediction
+Multi-label binary output: P(Depression), P(Anxiety)
+Simultaneous comorbidity screening
+Explanation
+Biomarker consensus (RF + XGB Venn), radar plots, dysbiosis heatmap
+Interpretable AI for clinicians
+Reporting
+Auto-generated PDF clinical report with risk tier, biomarkers, recommendations
+Audit trail for hospital records
+Synthetic Testing
+SDV-based synthetic patient generator for validation
+Safe pre-deployment model testing
+2. ML Model Architecture & Testing Strategy
+2.1 The Champion Model: GutMicrobiomeStacker
+The best-performing model in new_pathway_pipeline.ipynb is the GutMicrobiomeStacker — a custom probabilistic ensemble that combines:
+Component
+Description
+Base Model 1 — RF
+MultiOutputClassifier wrapping RandomForestClassifier — captures non-linear interactions, averaged feature importances across Depression/Anxiety outputs
+Base Model 2 — XGB Chain
+ClassifierChain(XGBClassifier) — models label dependency: first predicts Depression, then uses Depression_Context as an extra feature to predict Anxiety. This is the key innovation.
+Meta-Learner
+MultiOutputClassifier(LogisticRegression) — stacks RF and XGB probability outputs and learns an optimal weighted combination
+Feature Set
+13 Boruta-selected bacterial taxa: Lachnospira, Ruthenibacterium, Veillonella, Gardnerella, Pseudobutyrivibrio, Kocuria, Trueperella, Lancefieldella, Fructilactobacillus, Lachnoanaerobaculum, Corynebacterium, Raoultella, Lawsonella
+Training Data
+111 samples (SMOTE-Tomek resampled, balanced: 37 Healthy / 37 Depression Only / 37 Comorbid)
+2.2 Model Performance Benchmarks
+The following metrics were achieved in the 5-fold MultilabelStratifiedKFold cross-validation:
+Metric
+GutMicrobiomeStacker
+TabNet (Baseline)
+Depression ROC-AUC
+> 0.91 (stable)
+> 0.91 (higher variance)
+Anxiety ROC-AUC
+> 0.89 (stable)
+~0.88 (higher variance)
+Hamming Loss
+< 0.12
+~0.14
+F1 (Depression)
+High, low variance
+High, but inconsistent
+F1 (Anxiety)
+Strong
+Weaker across folds
+Interpretability
+Full (SHAP + Venn + Radar)
+Limited (attention masks only)
+Deployment Readiness
+High (sklearn-based, picklable)
+Medium (PyTorch dependency)
+2.3 Model Testing Plan — Synthetic Data Strategy
+Since original training data is limited to 111 SMOTE samples and raw clinical data cannot be shared externally, testing will use a two-track approach:
+Track A: Synthetic Data Generation (Primary Testing Track)
+Use the SDV (Synthetic Data Vault) library's GaussianCopulaSynthesizer to generate statistically faithful synthetic microbiome samples from the existing X_resampled.csv distribution. This produces test data that:
+Preserves marginal distributions of all 13 bacterial taxa
+Preserves inter-feature correlations (critical — gut taxa are co-regulated)
+Can produce arbitrarily large test sets (100–10,000 samples)
+Is not traceable to any real patient, satisfying HIPAA/DISHA compliance
+Implementation steps:
+Install SDV: pip install sdv
+Load X_resampled.csv + y_resampled.csv
+Fit GaussianCopulaSynthesizer on X_resampled (features only)
+Generate N=500 synthetic samples
+Apply the same StandardScaler fitted on training data
+Run GutMicrobiomeStacker.predict() and predict_proba()
+Compute: hamming_loss, roc_auc_score, classification_report on known-label synthetic data
+Visualize: plot_feature_consensus, plot_consensus_radar, plot_dysbiosis_signature on synthetic batch
+Synthetic Data Code Template (SDV)
+from sdv.single_table import GaussianCopulaSynthesizer
+from sdv.metadata import SingleTableMetadata
+metadata = SingleTableMetadata()
+metadata.detect_from_dataframe(X_resampled)
+synthesizer = GaussianCopulaSynthesizer(metadata)
+synthesizer.fit(X_resampled)
+synthetic_X = synthesizer.sample(num_rows=500)
+# Assign synthetic labels using the stacker
+synthetic_y = stacker.predict(synthetic_X)
+synthetic_proba = stacker.predict_proba(synthetic_X)
+# Evaluate
+print(classification_report(known_labels, synthetic_y))
+print('Hamming Loss:', hamming_loss(known_labels, synthetic_y))
+print('ROC-AUC:', roc_auc_score(known_labels, synthetic_proba, average='macro'))
+Track B: Edge Case & Robustness Testing (Secondary Track)
+Manually construct adversarial samples representing clinical edge cases:
+Edge Case
+Construction Method
+Extreme dysbiosis — all pathogenic taxa maxed
+Set Gardnerella=1.0, Veillonella=1.0, Corynebacterium=1.0, others=0 — expect Comorbid prediction
+Near-healthy — all protective taxa maxed
+Set Lachnospira=1.0, Pseudobutyrivibrio=1.0, others=median — expect Healthy
+Anxiety-only signature
+Spike Fructilactobacillus only (Comorbid marker), suppress Depression drivers — test label separation
+Missing taxa simulation
+Zero out 3–5 features to simulate incomplete 16S rRNA sequencing data
+Identical inputs — stability test
+Submit same sample 100 times — verify deterministic output
+Out-of-distribution test
+Values >2 SD from training distribution — expect model to flag uncertainty
+3. Technology Stack
+3.1 Full Stack Architecture
+Layer
+Technology
+Justification
+Frontend
+Next.js 14 (App Router) + TypeScript
+Server-side rendering for performance, typed API contracts, optimal for dashboards
+UI Framework
+Tailwind CSS + shadcn/ui
+Rapid clinical UI, accessible components, consistent design tokens
+Data Visualization
+Recharts + Plotly.js
+Recharts for dashboards; Plotly for radar/heatmap charts matching notebook visuals
+Backend API
+FastAPI (Python)
+Native Python — same runtime as sklearn/XGBoost, async support, OpenAPI auto-docs
+ML Serving
+FastAPI + joblib (pickle)
+GutMicrobiomeStacker serialized with joblib, loaded once at startup
+Database
+PostgreSQL + SQLAlchemy
+Relational: patients, samples, predictions, reports — ACID compliance for hospital records
+Authentication
+NextAuth.js + JWT
+Role-based access (Admin / Clinician / Researcher), session management
+File Storage
+AWS S3 / MinIO (self-hosted)
+PDF report storage, sample file uploads — HIPAA-eligible
+PDF Generation
+ReportLab (Python)
+Generates clinical PDF reports server-side with charts embedded
+Containerization
+Docker + Docker Compose
+One-command hospital deployment, isolated environments
+Reverse Proxy
+Nginx
+SSL termination, rate limiting, static file serving
+Testing (ML)
+pytest + SDV + sklearn metrics
+Synthetic data generation + model evaluation pipeline
+Testing (Frontend)
+Jest + Playwright
+Unit tests for components, E2E tests for critical clinical flows
+Monitoring
+Prometheus + Grafana
+API latency, prediction distribution drift, model performance over time
+4. Website Flow & User Journeys
+4.1 User Roles & Permissions
+Role
+Access Level
+Primary Use Case
+Hospital Admin
+Full: manage users, view all records, export data
+Onboard clinicians, manage hospital settings
+Clinician
+Submit samples, view own patient reports, download PDFs
+Day-to-day diagnostic use
+Researcher
+Read-only access to anonymized aggregate data, batch export
+Retrospective analysis, validation studies
+4.2 Primary User Journey — Clinician Prediction Flow
+The following 7-step flow represents the core clinical workflow from patient intake to report delivery:
+Step
+Page / Screen
+Action & Data Flow
+1
+Login / Auth
+Clinician logs in with hospital email + password. NextAuth issues JWT. Role-based redirect to /dashboard.
+2
+Dashboard
+Overview cards: Total Predictions, High Risk Patients, Recent Reports, Model Status badge. Quick action: [+ New Analysis].
+3
+Patient Registration
+Fill: Patient ID (anonymized), Age, Sex, Sample Collection Date, Notes. Submit creates Patient record in DB.
+4
+Sample Input
+Two input modes: (A) Manual Entry — 13 sliders/inputs for each bacterial taxon (0.0–1.0 relative abundance). (B) CSV Upload — upload a CSV matching the 13-column format. Validation + preview table shown before submission.
+5
+Analysis Running
+POST /api/predict called. Loading screen with animated gut-brain axis graphic. Server deserializes stacker, runs predict + predict_proba, computes SHAP-like importances.
+6
+Results Dashboard
+Four panels: (A) Prediction Card — Depression: Low/Moderate/High Risk with probability %. Anxiety: same. Comorbidity flag if both > 0.5. (B) Biomarker Radar — Plotly radar chart of top 8 consensus taxa. (C) Dysbiosis Heatmap — taxa vs condition signature. (D) Feature Venn — shared drivers between RF and XGB.
+7
+Report Generation
+Clinician clicks [Generate PDF Report]. POST /api/report — ReportLab creates PDF with: patient info, prediction summary, charts (base64), bacterial taxa table, clinical recommendations, model metadata. Download + auto-save to S3.
+4.3 Site Map — All Pages
+Route
+Page Description
+/
+Landing page — Product overview, hospital onboarding CTA, NEUROGUT value proposition
+/login
+Authentication — Hospital email login, forgot password
+/dashboard
+Main hub — Stats cards, recent predictions, alerts, quick actions
+/patients
+Patient list — Search, filter by date/risk tier, pagination
+/patients/[id]
+Patient profile — History of analyses, risk trend over time
+/analysis/new
+New analysis wizard — Patient select → Sample input → Run
+/analysis/[id]
+Results view — Prediction cards, charts, report download
+/reports
+Report history — All generated PDFs, filter by date/clinician
+/admin/users
+User management — Invite clinicians, assign roles
+/admin/settings
+Hospital settings — Name, logo, notification config
+/research/batch
+Batch analysis — Upload CSV of multiple patients (Researcher role)
+/research/export
+Data export — Anonymized aggregate dataset download
+/docs
+Documentation — API reference, CSV format guide, model card
+5. Backend Database Schema
+5.1 Entity Relationship Overview
+The schema is designed for a PostgreSQL relational database. All patient data is pseudonymized — no real names or contact info are stored, only hospital-assigned patient IDs.
+Table: hospitals
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+name
+VARCHAR(255) NOT NULL
+subdomain
+VARCHAR(100) UNIQUE NOT NULL  — used for multi-tenancy
+logo_url
+TEXT
+settings_json
+JSONB DEFAULT '{}'  — notification prefs, thresholds
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+Table: users
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+hospital_id
+UUID REFERENCES hospitals(id) ON DELETE CASCADE
+email
+VARCHAR(255) UNIQUE NOT NULL
+password_hash
+TEXT NOT NULL  — bcrypt hashed
+role
+ENUM('admin','clinician','researcher') NOT NULL
+full_name
+VARCHAR(255)
+is_active
+BOOLEAN DEFAULT TRUE
+last_login_at
+TIMESTAMPTZ
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+Table: patients
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+hospital_id
+UUID REFERENCES hospitals(id) ON DELETE CASCADE
+created_by
+UUID REFERENCES users(id)
+patient_code
+VARCHAR(50) NOT NULL  — hospital's internal anonymized ID
+age
+SMALLINT CHECK (age > 0 AND age < 120)
+sex
+ENUM('male','female','other','prefer_not_to_say')
+notes
+TEXT
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+UNIQUE
+(hospital_id, patient_code)
+Table: microbiome_samples
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+patient_id
+UUID REFERENCES patients(id) ON DELETE CASCADE
+submitted_by
+UUID REFERENCES users(id)
+collection_date
+DATE NOT NULL
+input_method
+ENUM('manual','csv_upload') NOT NULL
+lachnospira
+FLOAT4 CHECK (lachnospira >= 0 AND lachnospira <= 1)
+ruthenibacterium
+FLOAT4 CHECK ...
+veillonella
+FLOAT4 CHECK ...
+gardnerella
+FLOAT4 CHECK ...
+pseudobutyrivibrio
+FLOAT4 CHECK ...
+kocuria
+FLOAT4 CHECK ...
+trueperella
+FLOAT4 CHECK ...
+lancefieldella
+FLOAT4 CHECK ...
+fructilactobacillus
+FLOAT4 CHECK ...
+lachnoanaerobaculum
+FLOAT4 CHECK ...
+corynebacterium
+FLOAT4 CHECK ...
+raoultella
+FLOAT4 CHECK ...
+lawsonella
+FLOAT4 CHECK ...
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+Table: predictions
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+sample_id
+UUID REFERENCES microbiome_samples(id) ON DELETE CASCADE
+model_version
+VARCHAR(50) NOT NULL DEFAULT 'v1.0'
+depression_prob
+FLOAT4 NOT NULL  — P(Depression) from stacker
+anxiety_prob
+FLOAT4 NOT NULL  — P(Anxiety) from stacker
+depression_label
+SMALLINT NOT NULL  — 0 or 1 (threshold 0.5)
+anxiety_label
+SMALLINT NOT NULL  — 0 or 1
+risk_tier
+ENUM('healthy','depression_only','anxiety_only','comorbid') NOT NULL
+rf_importances_json
+JSONB  — {feature: importance} for RF model
+xgb_importances_json
+JSONB  — {feature: importance} for XGB chain
+consensus_features_json
+JSONB  — intersection of RF and XGB top-5 features
+processing_time_ms
+INTEGER
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+Table: reports
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+prediction_id
+UUID REFERENCES predictions(id) ON DELETE CASCADE
+generated_by
+UUID REFERENCES users(id)
+s3_url
+TEXT NOT NULL  — presigned S3/MinIO URL
+s3_key
+TEXT NOT NULL  — internal storage key
+report_version
+SMALLINT DEFAULT 1
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+6. API Specification (FastAPI Backend)
+6.1 Core Endpoints
+Method
+Endpoint
+Description & Response
+POST
+/api/auth/login
+Accepts email + password. Returns JWT access_token + refresh_token.
+POST
+/api/predict
+Accepts 13 microbiome features as JSON body. Loads GutMicrobiomeStacker, returns: depression_prob, anxiety_prob, risk_tier, rf_importances, xgb_importances, consensus_features.
+POST
+/api/predict/batch
+Accepts CSV file upload. Returns array of predictions. Rate-limited to Researcher role.
+POST
+/api/patients
+Create patient record. Returns patient UUID.
+GET
+/api/patients/{id}
+Fetch patient + all associated samples and predictions.
+POST
+/api/samples
+Submit microbiome sample (manual or CSV). Validates all 13 features in [0,1].
+GET
+/api/predictions/{id}
+Fetch prediction with full importances JSON.
+POST
+/api/reports/generate
+Trigger PDF generation for a prediction_id. Returns report_id.
+GET
+/api/reports/{id}/download
+Returns presigned S3 URL for PDF download (expires in 1hr).
+GET
+/api/model/health
+Returns: model_version, last_loaded_at, prediction_count, avg_latency_ms.
+GET
+/api/admin/users
+List all users in hospital. Admin role only.
+POST
+/api/admin/users/invite
+Send invite email to new clinician.
+7. Frontend Component Specification
+7.1 Design System
+NEUROGUT uses a clinical-grade design system inspired by medical software aesthetics: calm teal primary palette, high-contrast text, accessible color-coding for risk tiers.
+Design Token
+Value & Usage
+--primary
+#006D77  — Teal. Headers, CTAs, active states
+--primary-light
+#E8F4F5  — Light teal. Card backgrounds, info boxes
+--risk-healthy
+#22C55E  — Green. Healthy prediction badge
+--risk-moderate
+#F59E0B  — Amber. Moderate risk badge
+--risk-high
+#EF4444  — Red. High risk / comorbid alert
+--text-primary
+#1A1A2E  — Near-black. Body text
+--text-secondary
+#6B7280  — Gray. Secondary labels
+--font-sans
+Inter, system-ui, sans-serif
+--font-mono
+JetBrains Mono  — Feature names, values
+Border Radius
+8px cards, 4px inputs, 12px modals
+7.2 Key Components
+Component
+Specification
+<RiskCard>
+Props: condition (Depression|Anxiety), probability (float), label (0|1). Renders: large probability gauge (0-100%), risk tier badge (Healthy/Moderate/High), animated fill bar. Color changes by tier.
+<BiomarkerRadar>
+Plotly polar chart. Props: rf_importances, xgb_importances, feature_names. Renders overlapping RF (green) and XGB (red) normalized importance polygons. Top 8 consensus features shown.
+<DysbiosisHeatmap>
+Recharts HeatMap or Plotly heatmap. Rows = 13 taxa, Columns = 4 conditions (Healthy/Depression/Anxiety/Comorbid). Color scale: white (low) → teal (high abundance).
+<VennDiagram>
+SVG-based Venn showing overlap of RF top-5 and XGB top-5 features. Intersection labeled as 'Consensus Biomarkers'. Uses D3.js.
+<SampleInputForm>
+13 labeled sliders (0.0–1.0) with bacterium name, info tooltip, and live value display. Tabs to switch between Manual and CSV Upload modes. Real-time validation.
+<PredictionTimeline>
+Patient profile component. X-axis = date, Y-axis = depression/anxiety probability. Line chart showing risk evolution across multiple samples.
+<ReportButton>
+Disabled until prediction complete. Shows loading spinner during PDF generation. Triggers download on completion.
+8. Implementation Plan
+8.1 Project Phases
+Phase 1
+Week 1–2
+ML Model Serialization & Testing Infrastructure
+• Export GutMicrobiomeStacker to joblib: stacker.pkl + scaler.pkl
+• Write SDV synthetic data generation script (500 samples)
+• Build pytest test suite: edge cases, adversarial inputs, determinism checks
+• Compute and document final model metrics on synthetic holdout set
+• Create model card (version, training data, metrics, limitations)
+Phase 2
+Week 3–5
+FastAPI Backend
+• Initialize FastAPI project with folder structure: /api, /models, /schemas, /services
+• Implement /api/predict endpoint — load stacker.pkl, validate 13 features, return probabilities + importances
+• Set up PostgreSQL + SQLAlchemy models (all 6 tables)
+• Implement auth flow: JWT login, role middleware, hospital multi-tenancy
+• Implement patient + sample CRUD endpoints
+• Build ReportLab PDF generation service with embedded Plotly charts
+• Dockerize: Dockerfile for FastAPI + docker-compose.yml
+Phase 3
+Week 6–9
+Next.js Frontend
+• Scaffold Next.js 14 + TypeScript + Tailwind + shadcn/ui
+• Build auth pages: Login, forgot password, invite accept
+• Build Dashboard page: stats cards, recent predictions, quick actions
+• Build Analysis Wizard: patient select → sample input form → loading screen
+• Build Results page: RiskCard x2, BiomarkerRadar, DysbiosisHeatmap, VennDiagram
+• Build Patient Profile page with PredictionTimeline chart
+• Build Report download flow
+• Build Admin pages: user management, hospital settings
+• Responsive design + accessibility audit (WCAG 2.1 AA)
+Phase 4
+Week 10–12
+Integration, Testing & Deployment
+• End-to-end integration testing: full clinician flow from login to PDF download
+• Playwright E2E tests for critical paths
+• Performance testing: API latency < 200ms for single prediction
+• Security audit: SQL injection, JWT expiry, CORS, rate limiting
+• Set up Nginx reverse proxy + SSL certificates (Let's Encrypt)
+• Deploy to hospital server or cloud VM (AWS EC2 / DigitalOcean)
+• Set up Prometheus + Grafana monitoring dashboard
+• Write user documentation + API reference
+• Demo walkthrough recording for hospital stakeholders
+8.2 Detailed Sprint Breakdown
+Sprint
+Focus Area
+Deliverables
+S1 (W1-2)
+ML Testing
+stacker.pkl exported, synthetic_test.py passing, model card published
+S2 (W3)
+API Core
+FastAPI running, /predict endpoint live, Docker Compose up
+S3 (W4)
+Database
+All 6 PostgreSQL tables migrated, CRUD endpoints tested with Postman
+S4 (W5)
+Auth + Reports
+JWT auth working, PDF generation producing correct reports
+S5 (W6)
+Frontend Auth
+Login page, dashboard skeleton, API client (Axios/TanStack Query) wired
+S6 (W7)
+Sample Input
+SampleInputForm complete, validation working, POST to /api/predict live
+S7 (W8)
+Results Charts
+RiskCard, BiomarkerRadar, DysbiosisHeatmap, VennDiagram rendered
+S8 (W9)
+Patient Profiles
+Patient list, patient profile, prediction timeline, report download
+S9 (W10)
+Admin + Polish
+User management, settings, responsive design, dark mode
+S10 (W11)
+Integration Tests
+Playwright E2E suite, performance benchmarks, security audit
+S11 (W12)
+Deployment
+Nginx + SSL, cloud deployment, monitoring, documentation, demo
+9. Recommended Project Folder Structure
+Backend — FastAPI (Python)
+neurogut-backend/
+  ├── main.py                    # FastAPI app entrypoint
+  ├── requirements.txt
+  ├── Dockerfile
+  ├── api/
+  │   ├── auth.py                # JWT login/refresh
+  │   ├── predict.py             # POST /api/predict
+  │   ├── patients.py            # CRUD endpoints
+  │   ├── reports.py             # PDF generation + S3
+  │   └── admin.py               # User management
+  ├── models/
+  │   ├── stacker.pkl            # GutMicrobiomeStacker (joblib)
+  │   ├── scaler.pkl             # StandardScaler
+  │   └── model_card.json        # Version + metrics
+  ├── schemas/
+  │   ├── prediction.py          # Pydantic input/output
+  │   └── patient.py
+  ├── services/
+  │   ├── predictor.py           # Model loading + inference
+  │   ├── pdf_generator.py       # ReportLab PDF service
+  │   └── storage.py             # S3/MinIO client
+  ├── db/
+  │   ├── database.py            # SQLAlchemy engine
+  │   ├── models.py              # ORM table definitions
+  │   └── migrations/            # Alembic migrations
+  └── tests/
+      ├── test_predict.py        # Unit tests for inference
+      ├── test_synthetic.py      # SDV synthetic data tests
+      └── test_api.py            # Integration tests
+Frontend — Next.js 14 (TypeScript)
+neurogut-frontend/
+  ├── app/
+  │   ├── (auth)/login/page.tsx
+  │   ├── dashboard/page.tsx
+  │   ├── patients/
+  │   │   ├── page.tsx           # Patient list
+  │   │   └── [id]/page.tsx      # Patient profile
+  │   ├── analysis/
+  │   │   ├── new/page.tsx       # Analysis wizard
+  │   │   └── [id]/page.tsx      # Results view
+  │   ├── reports/page.tsx
+  │   ├── admin/
+  │   │   ├── users/page.tsx
+  │   │   └── settings/page.tsx
+  │   └── api/                   # Next.js API routes (proxy to FastAPI)
+  ├── components/
+  │   ├── ui/                    # shadcn/ui base components
+  │   ├── charts/
+  │   │   ├── BiomarkerRadar.tsx
+  │   │   ├── DysbiosisHeatmap.tsx
+  │   │   ├── VennDiagram.tsx
+  │   │   └── PredictionTimeline.tsx
+  │   ├── prediction/
+  │   │   ├── RiskCard.tsx
+  │   │   └── SampleInputForm.tsx
+  │   └── layout/
+  │       ├── Sidebar.tsx
+  │       └── Header.tsx
+  ├── lib/
+  │   ├── api.ts                 # Axios client + API calls
+  │   ├── auth.ts                # NextAuth config
+  │   └── utils.ts
+  └── types/
+      └── index.ts               # Prediction, Patient, Report types
+10. Non-Functional Requirements
+Requirement
+Target
+Prediction Latency
+< 200ms per single sample (excluding network)
+Batch Prediction
+< 5 seconds for 100-sample CSV
+PDF Generation
+< 3 seconds per report
+API Uptime
+> 99.5% monthly uptime SLA
+Concurrent Users
+Supports 50 concurrent clinicians per hospital instance
+Data Privacy
+HIPAA-aligned: pseudonymized patient IDs, encrypted at rest (AES-256), encrypted in transit (TLS 1.3)
+Authentication
+JWT with 24h expiry, refresh token rotation, brute force protection (5 failed attempts → lockout)
+Input Validation
+All 13 features must be float in [0.0, 1.0] — reject otherwise with HTTP 422
+Model Versioning
+All predictions store model_version — enables future model comparison
+Audit Trail
+Every prediction and report generation logged with user ID + timestamp
+Accessibility
+WCAG 2.1 AA compliant — color-blind safe palette, screen reader labels on charts
+Browser Support
+Chrome 100+, Firefox 100+, Safari 15+, Edge 100+
+11. AI IDE Implementation Guide
+11.1 How to Use This PRD with Cursor / Windsurf / GitHub Copilot
+This PRD is structured as a complete implementation specification. Paste relevant sections directly into your AI IDE as context. Recommended workflow:
+Start with Phase 1 — copy Section 2.3 (Synthetic Data Testing) into Cursor and ask: 'Implement the SDV synthetic data testing script as described, targeting X_resampled.csv'
+For the backend — copy Section 5 (schema) + Section 6 (API spec) and prompt: 'Create the FastAPI backend with these schemas and endpoints. Use SQLAlchemy + PostgreSQL.'
+For the predictor service — copy Section 2.1 (model architecture) and prompt: 'Create a predictor.py service that loads stacker.pkl with joblib and exposes a predict() function matching this schema.'
+For each frontend component — copy the component spec from Section 7.2 and prompt: 'Build the <BiomarkerRadar> component in React/TypeScript using Plotly.js matching this specification.'
+For deployment — copy Section 9 (folder structure) and prompt: 'Generate a docker-compose.yml for this Next.js + FastAPI + PostgreSQL + Nginx stack.'
+11.2 Critical Context for AI IDE
+Always include this context block when prompting:
+AI IDE Context Block — Paste at Start of Every Session
+Project: NEUROGUT — Hospital-facing gut microbiome diagnostic platform
+ML Model: GutMicrobiomeStacker (RF MultiOutput + XGB ClassifierChain + LR meta-learner)
+Task: Multi-label binary classification — Depression (0/1) and Anxiety (0/1)
+Features: 13 bacterial taxa (Lachnospira, Ruthenibacterium, Veillonella, Gardnerella,
+          Pseudobutyrivibrio, Kocuria, Trueperella, Lancefieldella, Fructilactobacillus,
+          Lachnoanaerobaculum, Corynebacterium, Raoultella, Lawsonella)
+Input range: All features are float in [0.0, 1.0] (relative abundance)
+Output: depression_prob, anxiety_prob, risk_tier, rf_importances, xgb_importances
+Backend: FastAPI (Python 3.11) + PostgreSQL + joblib
+Frontend: Next.js 14 + TypeScript + Tailwind + shadcn/ui + Plotly.js
+End User: Hospital clinicians and researchers — HIPAA-aligned design
+12. Appendix
+12.1 Bacterial Taxa Clinical Reference
+Taxon
+Clinical Role
+Gardnerella
+Primary pathological driver — highest importance in both RF and XGB. Elevated in Comorbid. Severity marker.
+Corynebacterium
+Core diagnostic driver — strong spike in Depression and Comorbid conditions.
+Veillonella
+Pathological — elevated in Comorbid. Inflammation-associated.
+Lachnospira
+Protective — butyrate producer. Depleted in Depression/Comorbid. Low value = risk signal.
+Pseudobutyrivibrio
+Protective — butyrate and gut barrier function. Depleted in disease states.
+Fructilactobacillus
+Comorbidity marker — spikes only in Comorbid, not Depression-only. Key for label separation.
+Trueperella
+Differentiation marker — helps distinguish Depression vs Comorbid.
+Lawsonella
+Secondary driver — co-elevates with Gardnerella in severe cases.
+Ruthenibacterium
+Emerging marker — secondary importance in XGB chain.
+Kocuria
+Context-dependent — moderate importance across conditions.
+Lancefieldella
+Lower importance — contextual signal.
+Lachnoanaerobaculum
+Secondary — oral-gut axis microbe.
+Raoultella
+Secondary — oxidative stress association.
+12.2 Risk Tier Classification Logic
+Risk Tier
+Classification Rule
+Healthy
+depression_label=0 AND anxiety_label=0  (depression_prob < 0.5 AND anxiety_prob < 0.5)
+Depression Only
+depression_label=1 AND anxiety_label=0
+Anxiety Only
+depression_label=0 AND anxiety_label=1
+Comorbid
+depression_label=1 AND anxiety_label=1  — highest priority alert
+— End of Document —

@@ -1,0 +1,146 @@
+{
+  "model_name": "GutMicrobiomeStacker",
+  "version": "v1.0",
+  "description": "Multi-label stacked ensemble for predicting Depression and Anxiety from gut microbiome composition (13 bacterial taxa). Architecture: RF MultiOutput + XGB ClassifierChain (Depression->Anxiety) + LR Meta-Learner.",
+  "task": "Multi-label binary classification (Depression, Anxiety)",
+  "features": [
+    "Lachnospira",
+    "Ruthenibacterium",
+    "Veillonella",
+    "Gardnerella",
+    "Pseudobutyrivibrio",
+    "Kocuria",
+    "Trueperella",
+    "Lancefieldella",
+    "Fructilactobacillus",
+    "Lachnoanaerobaculum",
+    "Corynebacterium",
+    "Raoultella",
+    "Lawsonella"
+  ],
+  "feature_count": 13,
+  "input_description": "13 bacterial taxa relative abundances (CLR-transformed or raw scaled values)",
+  "output": {
+    "depression_prob": "P(Depression) from meta-learner [0.0, 1.0]",
+    "anxiety_prob": "P(Anxiety) from meta-learner [0.0, 1.0]",
+    "depression_label": "0 or 1 (threshold 0.5)",
+    "anxiety_label": "0 or 1 (threshold 0.5)",
+    "risk_tier": "healthy | depression_only | anxiety_only | comorbid"
+  },
+  "architecture": {
+    "base_model_1": "MultiOutputClassifier(RandomForestClassifier(n_estimators=100))",
+    "base_model_2": "ClassifierChain(XGBClassifier, order=[Depression->Anxiety])",
+    "meta_learner": "MultiOutputClassifier(LogisticRegression)",
+    "innovation": "XGB chain uses Depression prediction as extra feature for Anxiety prediction"
+  },
+  "training_data": {
+    "source": "SMOTE-Tomek resampled gut microbiome dataset",
+    "samples": 111,
+    "class_distribution": {
+      "healthy": 37,
+      "depression_only": 37,
+      "anxiety_only": 0,
+      "comorbid": 37
+    }
+  },
+  "cross_validation": {
+    "method": "5-fold MultilabelStratifiedKFold",
+    "metrics": {
+      "dep_auc": {
+        "mean": 0.9455,
+        "std": 0.0732
+      },
+      "anx_auc": {
+        "mean": 0.8929,
+        "std": 0.0984
+      },
+      "dep_f1": {
+        "mean": 0.9332,
+        "std": 0.0469
+      },
+      "anx_f1": {
+        "mean": 0.8616,
+        "std": 0.0753
+      },
+      "hamming": {
+        "mean": 0.086,
+        "std": 0.0444
+      },
+      "accuracy_dep": {
+        "mean": 0.9095,
+        "std": 0.0646
+      },
+      "accuracy_anx": {
+        "mean": 0.9186,
+        "std": 0.0344
+      }
+    }
+  },
+  "feature_importances": {
+    "rf_importances": {
+      "Lachnospira": 0.070582,
+      "Ruthenibacterium": 0.088294,
+      "Veillonella": 0.093995,
+      "Gardnerella": 0.066839,
+      "Pseudobutyrivibrio": 0.066905,
+      "Kocuria": 0.060228,
+      "Trueperella": 0.079402,
+      "Lancefieldella": 0.098117,
+      "Fructilactobacillus": 0.089024,
+      "Lachnoanaerobaculum": 0.066264,
+      "Corynebacterium": 0.08922,
+      "Raoultella": 0.093985,
+      "Lawsonella": 0.037145
+    },
+    "xgb_importances": {
+      "Lachnospira": 0.024919,
+      "Ruthenibacterium": 0.076447,
+      "Veillonella": 0.026209,
+      "Gardnerella": 0.024494,
+      "Pseudobutyrivibrio": 0.042004,
+      "Kocuria": 0.071755,
+      "Trueperella": 0.017368,
+      "Lancefieldella": 0.049399,
+      "Fructilactobacillus": 0.012529,
+      "Lachnoanaerobaculum": 0.159109,
+      "Corynebacterium": 0.064702,
+      "Raoultella": 0.101456,
+      "Lawsonella": 0.038625
+    },
+    "rf_top5": [
+      "Corynebacterium",
+      "Fructilactobacillus",
+      "Lancefieldella",
+      "Raoultella",
+      "Veillonella"
+    ],
+    "xgb_top5": [
+      "Corynebacterium",
+      "Kocuria",
+      "Lachnoanaerobaculum",
+      "Raoultella",
+      "Ruthenibacterium"
+    ],
+    "consensus_biomarkers": [
+      "Corynebacterium",
+      "Raoultella"
+    ]
+  },
+  "risk_tier_logic": {
+    "healthy": "depression_label=0 AND anxiety_label=0",
+    "depression_only": "depression_label=1 AND anxiety_label=0",
+    "anxiety_only": "depression_label=0 AND anxiety_label=1",
+    "comorbid": "depression_label=1 AND anxiety_label=1"
+  },
+  "limitations": [
+    "Training data limited to 111 SMOTE-resampled samples from a single cohort",
+    "Features are CLR-transformed -- raw 16S counts must be transformed before input",
+    "No external validation on independent clinical cohort yet",
+    "Model does not flag out-of-distribution inputs automatically"
+  ],
+  "created_at": "2026-05-03T14:34:45.555579+00:00",
+  "training_time_seconds": 0.26,
+  "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+  "sklearn_version": "1.8.0",
+  "xgboost_version": "3.2.0"
+}

@@ -230,9 +230,25 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# ML models (optional but recommended)
-*.pkl
+# ML models -- allow .pkl in neurogut-backend/models/
+# *.pkl
 /plots
 
 # OS files
 .DS_Store
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+
+# SQLite database (auto-generated)
+*.db
+
+# Generated reports
+neurogut-backend/reports/*.pdf
+
+# AGENTS.md
+AGENTS.md
