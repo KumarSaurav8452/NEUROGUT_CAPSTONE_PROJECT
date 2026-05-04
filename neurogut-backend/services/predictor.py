@@ -53,6 +53,16 @@ class PredictorService:
         return self.stacker is not None and self.scaler is not None
 
     @property
+    def model(self):
+        """Expose model for bootstrap CI computation."""
+        return self.stacker
+
+    @property
+    def scaler_obj(self):
+        """Expose scaler for bootstrap CI computation."""
+        return self.scaler
+
+    @property
     def model_version(self) -> str:
         if self.model_card:
             return self.model_card.get("version", "v1.0")

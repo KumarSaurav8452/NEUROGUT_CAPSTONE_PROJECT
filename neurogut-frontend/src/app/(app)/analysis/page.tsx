@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import { TAXA_NAMES, TAXA_DISPLAY, RISK_CONFIG } from "@/lib/types";
+import { TAXA_NAMES, TAXA_DISPLAY, RISK_CONFIG, TAXA_CLINICAL_INFO } from "@/lib/types";
 import type { PredictionInput, PredictionResult, Patient } from "@/lib/types";
 import { FlaskConical, Download, RotateCcw, Brain, Heart, Users } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -178,14 +178,27 @@ export default function AnalysisPage() {
                   <div className="risk-prob" style={{ color: result.depression_label ? "#F59E0B" : "#22C55E", fontSize: 36 }}>
                     {(result.depression_prob * 100).toFixed(1)}%
                   </div>
+                  {result.depression_ci_low != null && (
+                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 4 }}>
+                      95% CI: {(result.depression_ci_low * 100).toFixed(1)}% – {((result.depression_ci_high ?? 0) * 100).toFixed(1)}%
+                    </div>
+                  )}
                   <span className={`badge ${result.depression_label ? "badge-moderate" : "badge-healthy"}`}>
                     {result.depression_label ? "POSITIVE" : "NEGATIVE"}
                   </span>
-                  <div className="risk-bar" style={{ marginTop: 8 }}>
+                  <div className="risk-bar" style={{ marginTop: 8, position: "relative" }}>
                     <div className="risk-bar-fill" style={{
                       width: `${result.depression_prob * 100}%`,
                       background: result.depression_label ? "linear-gradient(90deg, #F59E0B, #EF4444)" : "linear-gradient(90deg, #22C55E, #10B981)",
                     }} />
+                    {result.depression_ci_low != null && (
+                      <div style={{
+                        position: "absolute", top: 0, height: "100%",
+                        left: `${(result.depression_ci_low ?? 0) * 100}%`,
+                        width: `${((result.depression_ci_high ?? 0) - (result.depression_ci_low ?? 0)) * 100}%`,
+                        background: "rgba(0,0,0,0.08)", borderRadius: 4,
+                      }} />
+                    )}
                   </div>
                 </div>
                 {/* Anxiety */}
@@ -197,14 +210,27 @@ export default function AnalysisPage() {
                   <div className="risk-prob" style={{ color: result.anxiety_label ? "#F59E0B" : "#22C55E", fontSize: 36 }}>
                     {(result.anxiety_prob * 100).toFixed(1)}%
                   </div>
+                  {result.anxiety_ci_low != null && (
+                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 4 }}>
+                      95% CI: {(result.anxiety_ci_low * 100).toFixed(1)}% – {((result.anxiety_ci_high ?? 0) * 100).toFixed(1)}%
+                    </div>
+                  )}
                   <span className={`badge ${result.anxiety_label ? "badge-moderate" : "badge-healthy"}`}>
                     {result.anxiety_label ? "POSITIVE" : "NEGATIVE"}
                   </span>
-                  <div className="risk-bar" style={{ marginTop: 8 }}>
+                  <div className="risk-bar" style={{ marginTop: 8, position: "relative" }}>
                     <div className="risk-bar-fill" style={{
                       width: `${result.anxiety_prob * 100}%`,
                       background: result.anxiety_label ? "linear-gradient(90deg, #F59E0B, #EF4444)" : "linear-gradient(90deg, #22C55E, #10B981)",
                     }} />
+                    {result.anxiety_ci_low != null && (
+                      <div style={{
+                        position: "absolute", top: 0, height: "100%",
+                        left: `${(result.anxiety_ci_low ?? 0) * 100}%`,
+                        width: `${((result.anxiety_ci_high ?? 0) - (result.anxiety_ci_low ?? 0)) * 100}%`,
+                        background: "rgba(0,0,0,0.08)", borderRadius: 4,
+                      }} />
+                    )}
                   </div>
                 </div>
               </div>

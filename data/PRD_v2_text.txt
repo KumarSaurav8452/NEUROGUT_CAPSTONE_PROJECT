@@ -1,0 +1,665 @@
+
+NEUROGUT
+Gut-Brain Axis Diagnostic Platform
+
+
+Product Requirements Document  •  v2.0
+
+Version
+2.0.0 — May 2025
+Project
+NEUROGUT Capstone
+End User
+Hospital Clinicians & Researchers
+Model Type
+Multi-label ML (RF + XGB Stacked Ensemble)
+Status
+✅  v1.0 Executed — v2.0 Enhancement Phase
+
+
+1.  Project Overview & Enhancement Context
+
+
+1.1  What is NEUROGUT?
+NEUROGUT is an AI-powered clinical decision support platform that analyzes gut microbiome composition to predict neuropsychiatric conditions — specifically Depression and Anxiety — via the Gut-Brain Axis (GBA). It is designed as a hospital-facing SaaS tool enabling clinicians, gastroenterologists, and psychiatrists to submit a patient's microbiome sample data and receive a multi-label probability prediction, biomarker explanation, and clinical risk report.
+
+1.2  v2.0 Scope — What's New
+The v1.0 platform has been fully executed. v2.0 focuses on three primary improvement pillars identified from the executed build, plus four additional improvements recommended by the project team.
+
+#
+Improvement Pillar
+Objective
+1
+Enhanced PDF Report
+Richer downloadable clinical report with charts, confidence intervals, trend data, and structured medical sections
+2
+Improved Website Flow
+Streamlined UX, contextual onboarding, smart navigation, progressive disclosure of clinical data
+3
+Longitudinal Tracking
+Track patient microbiome & risk evolution across multiple visits over time
+4
+Clinical Benchmarking
+Compare a patient's microbiome profile against de-identified hospital cohort averages
+5
+Notification System
+Automated high-risk patient alerts via email/in-app for timely clinical follow-up
+6
+Audit & Compliance Log
+Full HIPAA-grade audit trail UI for all data accesses, predictions, and report downloads
+7
+Model Confidence Bands
+Display prediction uncertainty ranges alongside probabilities for clinician trust calibration
+
+
+2.  Technology Stack
+
+
+2.1  Full Stack Architecture
+
+Layer
+Technology
+Version
+Justification
+Frontend
+Next.js + TypeScript
+14 (App Router)
+SSR, typed API contracts, optimal for dashboards
+UI Framework
+Tailwind CSS + shadcn/ui
+Latest
+Rapid clinical UI, accessible components, consistent tokens
+Charting
+Recharts + Plotly.js
+2.x / 2.x
+Recharts for dashboards; Plotly for radar/heatmap charts
+Backend API
+FastAPI (Python)
+0.110+
+Native Python — same runtime as sklearn/XGBoost, async, OpenAPI docs
+ML Serving
+FastAPI + joblib
+—
+GutMicrobiomeStacker serialized with joblib, loaded once at startup
+Database
+PostgreSQL + SQLAlchemy
+16 / 2.x
+Relational, ACID compliance for hospital records
+Auth
+NextAuth.js + JWT
+5.x
+RBAC — Admin / Clinician / Researcher, session management
+File Storage
+AWS S3 / MinIO
+—
+PDF report storage, sample file uploads — HIPAA-eligible
+PDF Generation
+ReportLab + WeasyPrint
+4.x / 62+
+ReportLab for core; WeasyPrint for HTML-templated enhanced reports v2
+Email Alerts
+SendGrid / SMTP
+—
+High-risk patient alerts; invite emails — NEW in v2.0
+Containers
+Docker + Docker Compose
+24+
+One-command hospital deployment, isolated environments
+Reverse Proxy
+Nginx
+1.25+
+SSL termination, rate limiting, static file serving
+ML Testing
+pytest + SDV + sklearn
+Latest
+Synthetic data generation + model evaluation pipeline
+Frontend Testing
+Jest + Playwright
+Latest
+Unit + E2E tests for critical clinical flows
+Monitoring
+Prometheus + Grafana
+Latest
+API latency, prediction drift, model performance over time
+
+
+3.  Website Flow & User Journeys  (v2.0)
+
+
+3.1  User Roles & Permissions
+
+Role
+Access Level
+Primary Use Case
+Hospital Admin
+Full — manage users, all records, export
+Onboard clinicians, manage hospital settings, view compliance logs
+Clinician
+Submit samples, own patients, PDFs
+Day-to-day diagnostic use, longitudinal tracking, report download
+Researcher
+Read-only anonymized data, batch export
+Retrospective analysis, cohort benchmarking, validation studies
+
+3.2  Improved Website Flow — Full Site Map (v2.0)
+New routes are marked ✦ NEW. Enhanced routes are marked ✎ UPDATED.
+
+Route
+Page Description
+/
+Landing — Product overview, hospital onboarding CTA, NEUROGUT value proposition, live demo embed
+/login
+Auth — Hospital email login, forgot password, SSO hook for hospital identity providers
+/onboarding  ✦ NEW
+First-login wizard — hospital setup, invite clinicians, set risk thresholds, configure notifications
+/dashboard  ✎ UPDATED
+Main hub — Stats cards, risk distribution donut chart, recent activity feed, unread alerts panel, model health badge
+/patients
+Patient list — Search, filter by date/risk tier/clinician, pagination, bulk export
+/patients/[id]  ✎ UPDATED
+Patient profile — History of analyses, longitudinal risk trend chart, microbiome evolution heatmap, notes timeline
+/analysis/new  ✎ UPDATED
+Analysis wizard — Patient select → Sample input (with taxon reference tooltips) → Confirmation → Run
+/analysis/[id]  ✎ UPDATED
+Results — Prediction cards with confidence bands, BiomarkerRadar, DysbiosisHeatmap, VennDiagram, Cohort Benchmark panel, Enhanced PDF download
+/reports
+Report history — All generated PDFs, filter by date/clinician/risk tier, bulk download ZIP
+/benchmarks  ✦ NEW
+Cohort benchmarking — de-identified population averages by risk tier; compare patient against cohort
+/alerts  ✦ NEW
+Alerts center — High-risk patient notifications, alert rules config, escalation history
+/audit  ✦ NEW
+Audit log — HIPAA-grade timestamped log of all data accesses, predictions, report downloads, logins
+/admin/users
+User management — Invite clinicians, assign roles, deactivate users
+/admin/settings  ✎ UPDATED
+Hospital settings — Name, logo, risk thresholds, notification rules, email SMTP config
+/research/batch
+Batch analysis — Upload CSV of multiple patients (Researcher role)
+/research/export
+Data export — Anonymized aggregate dataset download
+/docs
+Documentation — API reference, CSV format guide, model card, taxa clinical reference
+
+3.3  Improved Clinician Journey — 9-Step Flow  (v2.0)
+Additions over v1.0 are highlighted. The flow now includes context assistance, confidence communication, cohort comparison, and smarter report triggering.
+
+Step
+Screen
+Action & Data Flow
+1
+Login / Auth
+Clinician logs in with hospital email. NextAuth issues JWT. Role-based redirect to /dashboard. First login → /onboarding wizard.
+2
+Dashboard ✎
+Overview cards: Total Predictions, High Risk Patients, Recent Reports, Model Status. NEW: Risk distribution donut chart, unread alerts count, 7-day prediction trend sparkline.
+3
+Patient Selection
+Search existing patients or register new. Existing patients show last risk tier badge and last analysis date.
+4
+Sample Input ✎
+13 taxon sliders with NEW: info tooltips explaining clinical role of each bacterium. CSV upload shows diff vs last sample. Range validation with friendly error messages.
+5
+Analysis Running
+POST /api/predict called. Loading screen with animated gut-brain graphic. Progress steps shown: Normalizing → Ensemble Inference → Computing Importances → Building Charts.
+6
+Results ✎
+Prediction cards now show probability + confidence band (±CI). Comorbidity flag auto-highlighted. NEW: Cohort Benchmark panel comparing patient to anonymized hospital cohort percentile.
+7
+Risk Alert ✦
+If Comorbid or High Risk: system auto-creates alert in /alerts. Clinician shown in-app banner. Email notification sent per hospital alert rules.
+8
+Report Generation ✎
+Enhanced PDF includes: clinical narrative, charts, confidence intervals, cohort comparison, longitudinal trend (if prior analyses exist), taxa table, recommendations, model metadata, digital signature.
+9
+Audit Entry ✦
+Every action (predict, report download, patient view) auto-logged to audit table with user ID, timestamp, IP. Accessible at /audit for admin.
+
+
+4.  Enhanced PDF Report Specification  (v2.0)
+
+
+The v1.0 PDF contained: patient info, prediction summary, charts, taxa table, recommendations, model metadata. The v2.0 report adds six new structured sections to meet clinical documentation standards.
+
+4.1  Report Sections — Full Structure
+
+§
+Section
+Content
+1
+Report Header & Branding
+Hospital logo, name, NEUROGUT watermark, report ID (UUID), generated date, generating clinician name + credentials
+2
+Patient Summary
+Anonymized Patient Code, Age, Sex, Sample collection date, attending clinician, report version
+3
+Executive Clinical Summary  ✦ NEW
+1-paragraph auto-generated narrative: 'Patient presents with [risk tier] profile. Elevated Gardnerella (0.87) and Corynebacterium (0.74) indicate [condition]. Recommend psychiatric referral…'
+4
+Prediction Results with Confidence  ✎ UPDATED
+Depression prob + 95% CI band, Anxiety prob + 95% CI band, Risk Tier badge, Comorbidity flag. Colour-coded severity indicator bar.
+5
+Biomarker Analysis Charts  ✎ UPDATED
+(A) Biomarker Radar — RF vs XGB overlaid polygons. (B) Dysbiosis Heatmap — taxa × conditions. (C) Feature Venn — consensus biomarkers. (D) Taxon Bar Chart — top 5 drivers ranked by importance score  ✦ NEW.
+6
+Longitudinal Trend  ✦ NEW
+If 2+ analyses exist for this patient: line chart showing Depression prob and Anxiety prob over time across visits. Table of all prior analyses with dates and risk tiers.
+7
+Cohort Benchmark  ✦ NEW
+Box-and-whisker chart comparing patient's key taxa values vs de-identified hospital cohort distribution by risk tier. Percentile rank shown for top 5 taxa.
+8
+Bacterial Taxa Reference Table  ✎ UPDATED
+All 13 taxa with: patient value, population normal range, clinical role (Protective/Pathological), importance rank, and delta from last analysis  ✦ NEW.
+9
+Clinical Recommendations  ✎ UPDATED
+Risk-tier-specific: dietary interventions, probiotic candidates, referral pathway (GI / Psychiatry / Both), follow-up timeline recommendation. ICD-10 code suggestions  ✦ NEW.
+10
+Model Metadata & Disclaimer
+Model version, training date, feature set, confidence methodology, FDA/CE status, clinical disclaimer, contact for model queries
+11
+Digital Signature Block  ✦ NEW
+Clinician name, designation, date, hospital, signature field placeholder (print-ready). Report integrity hash (SHA-256 of content).
+
+4.2  Report Generation — Technical Spec
+
+Use WeasyPrint for HTML-template-based rendering (supports complex layouts and CSS), with embedded Plotly chart images (PNG via kaleido).
+All charts rendered server-side via plotly.io.to_image() and embedded as base64 PNG in the HTML template before PDF conversion.
+Executive narrative generated by rule-based template engine using prediction thresholds and taxon values (no LLM dependency — deterministic and auditable).
+Longitudinal section conditionally rendered only if patient has >= 2 prior analyses in DB.
+Cohort benchmark uses anonymized aggregate computed nightly and cached in Redis (new dependency for v2.0).
+Report SHA-256 hash stored in reports table; verifiable by admin via /audit.
+
+
+5.  New Feature Specifications  (v2.0)
+
+
+5.1  Longitudinal Patient Tracking
+Patients with multiple sample analyses now have a dedicated longitudinal view on their profile page.
+
+Frontend: /patients/[id] page gains a new 'Trend' tab with a Recharts LineChart (Depression prob, Anxiety prob, date on X-axis).
+Frontend: Microbiome Evolution Heatmap — taxa on Y-axis, visit dates on X-axis, abundance colour scale.
+Backend: GET /api/patients/{id}/trend returns ordered array of { sample_date, depression_prob, anxiety_prob, risk_tier } for all analyses.
+Alert: if trend shows 3 consecutive increases in depression_prob, flag patient as 'Deteriorating' in dashboard.
+PDF: Longitudinal section auto-included in report when trend data exists.
+
+5.2  Cohort Benchmarking
+Allows clinicians to see how a patient compares against the broader hospital population segmented by risk tier.
+
+Nightly background job (Celery / APScheduler) computes per-taxa percentile distributions grouped by risk_tier — stored in cohort_benchmarks table.
+GET /api/benchmarks returns { taxon, tier, p25, p50, p75, mean, std } for all 13 taxa × 4 tiers.
+Results page gains 'Cohort Comparison' panel: box plots per taxon, patient value overlaid as orange dot.
+Benchmarks page (/benchmarks) shows population-level distribution charts for research use.
+All benchmark data is de-identified; raw patient values are never exposed in aggregate APIs.
+
+5.3  Notification & Alert System
+Automated alerts ensure clinicians are notified promptly when a high-risk result is produced.
+
+Alert trigger rules (configurable per hospital via /admin/settings): Comorbid = always alert; High Risk single condition = alert if probability > configurable threshold (default 0.75).
+In-app alerts: banner on dashboard + badge on /alerts page. Mark as resolved with notes.
+Email alerts: SendGrid / SMTP. Template includes: patient code, risk tier, prediction probabilities, link to results page.
+Backend: POST /api/alerts creates alert record; GET /api/alerts returns paginated alert history.
+Alert escalation: if alert unresolved after 48h, escalate to Hospital Admin.
+
+5.4  Audit & Compliance Log
+HIPAA-grade audit trail for every significant data event in the system.
+
+New audit_logs DB table: id, user_id, action (ENUM), resource_type, resource_id, ip_address, user_agent, timestamp.
+Logged actions: LOGIN, LOGOUT, PATIENT_VIEW, SAMPLE_SUBMIT, PREDICTION_RUN, REPORT_GENERATE, REPORT_DOWNLOAD, USER_INVITE, SETTINGS_CHANGE, DATA_EXPORT.
+GET /api/audit — admin-only, paginated, filterable by user/action/date range.
+/audit page: tabular view with filters, CSV export for compliance submissions.
+Audit records are immutable — no DELETE endpoint; retention policy configurable (default 7 years).
+
+5.5  Prediction Confidence Bands
+Clinicians need to understand not just the probability, but how certain the model is — essential for high-stakes clinical decisions.
+
+Method: Bootstrap resampling over 100 iterations of the stacked ensemble to compute ±95% CI around depression_prob and anxiety_prob.
+Backend: /api/predict response gains depression_ci_low, depression_ci_high, anxiety_ci_low, anxiety_ci_high fields.
+Frontend: RiskCard component updated — probability gauge now shows CI range as a lighter band around the pointer.
+UI copy: 'Depression Risk: 72% (CI: 64%–79%)' — educates clinicians on model uncertainty.
+PDF: Confidence bands shown on prediction summary section with brief explanation of methodology.
+
+
+6.  Updated Database Schema  (v2.0 Additions)
+
+
+All v1.0 tables remain unchanged. The following tables are added in v2.0.
+
+6.1  New Tables
+
+Table: audit_logs  ✦ NEW
+
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id
+UUID REFERENCES users(id) ON DELETE SET NULL
+action
+ENUM('LOGIN','LOGOUT','PATIENT_VIEW','SAMPLE_SUBMIT','PREDICTION_RUN','REPORT_GENERATE','REPORT_DOWNLOAD','USER_INVITE','SETTINGS_CHANGE','DATA_EXPORT') NOT NULL
+resource_type
+VARCHAR(50)  — e.g. 'patient', 'prediction', 'report'
+resource_id
+UUID  — FK to relevant resource
+ip_address
+INET
+user_agent
+TEXT
+created_at
+TIMESTAMPTZ DEFAULT NOW()  — immutable, no update allowed
+
+Table: alerts  ✦ NEW
+
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+prediction_id
+UUID REFERENCES predictions(id) ON DELETE CASCADE
+patient_id
+UUID REFERENCES patients(id) ON DELETE CASCADE
+triggered_by_rule
+VARCHAR(100)  — e.g. 'comorbid_auto' or 'high_risk_threshold'
+status
+ENUM('unread','read','resolved','escalated') NOT NULL DEFAULT 'unread'
+resolved_by
+UUID REFERENCES users(id) ON DELETE SET NULL
+resolved_at
+TIMESTAMPTZ
+notes
+TEXT
+created_at
+TIMESTAMPTZ DEFAULT NOW()
+
+Table: cohort_benchmarks  ✦ NEW
+
+Column
+Type + Constraints
+id
+UUID PRIMARY KEY DEFAULT gen_random_uuid()
+taxon_name
+VARCHAR(100) NOT NULL
+risk_tier
+ENUM('healthy','depression_only','anxiety_only','comorbid') NOT NULL
+sample_count
+INTEGER NOT NULL
+mean_value
+FLOAT4 NOT NULL
+std_value
+FLOAT4 NOT NULL
+p25_value
+FLOAT4 NOT NULL
+p50_value
+FLOAT4 NOT NULL
+p75_value
+FLOAT4 NOT NULL
+computed_at
+TIMESTAMPTZ NOT NULL DEFAULT NOW()
+UNIQUE
+(taxon_name, risk_tier)
+
+Updated Table: predictions  ✎
+The following columns are added to the existing predictions table:
+
+New Column
+Type + Constraints
+depression_ci_low
+FLOAT4  — lower bound of 95% CI for depression_prob
+depression_ci_high
+FLOAT4  — upper bound of 95% CI for depression_prob
+anxiety_ci_low
+FLOAT4  — lower bound of 95% CI for anxiety_prob
+anxiety_ci_high
+FLOAT4  — upper bound of 95% CI for anxiety_prob
+bootstrap_iterations
+SMALLINT DEFAULT 100  — CI computation iterations
+
+
+7.  Updated API Specification  (v2.0 Additions)
+
+
+All v1.0 endpoints remain. The following endpoints are added or updated in v2.0.
+
+Method
+Endpoint
+Description & Response
+POST
+/api/predict  ✎
+Now also returns: depression_ci_low, depression_ci_high, anxiety_ci_low, anxiety_ci_high via bootstrap sampling
+GET
+/api/patients/{id}/trend
+Returns time-ordered array of {sample_date, depression_prob, anxiety_prob, risk_tier} for all analyses of a patient
+GET
+/api/benchmarks
+Returns cohort benchmark stats for all 13 taxa × 4 risk tiers. Cached from nightly job.
+GET
+/api/alerts
+Paginated alerts list for current clinician's patients. Filter by status, date. Admin sees all.
+PATCH
+/api/alerts/{id}/resolve
+Mark alert as resolved. Body: { notes: string }. Logs to audit_logs.
+GET
+/api/audit
+Admin-only. Paginated audit log. Filter by user_id, action, date range. Returns CSV on ?format=csv.
+POST
+/api/reports/generate  ✎
+Enhanced — triggers WeasyPrint PDF with all v2.0 sections. Accepts include_trend (bool), include_benchmark (bool) flags.
+GET
+/api/admin/alert-rules
+Returns hospital alert rule config: risk tiers to alert on, probability thresholds, email recipients
+PUT
+/api/admin/alert-rules
+Update hospital alert rule config. Admin only. Logs to audit_logs.
+
+
+8.  Implementation Plan  (v2.0)
+
+
+v2.0 is structured as a 3-phase, 8-sprint plan layered on top of the already-deployed v1.0 platform.
+
+8.1  Phase Overview
+
+Phase
+Focus
+Deliverables
+Phase A  W1–3
+Backend Foundations
+audit_logs table, alerts table, cohort_benchmarks table, CI computation in predict endpoint, nightly benchmark job, new API endpoints
+Phase B  W4–6
+Enhanced PDF & Charts
+WeasyPrint report system, all 11 PDF sections, longitudinal trend chart, cohort benchmark chart, confidence bands in report
+Phase C  W7–10
+Frontend & Integration
+Dashboard updates, /alerts page, /audit page, /benchmarks page, longitudinal trend on patient profile, confidence band UI in RiskCard, onboarding wizard
+
+8.2  Sprint Breakdown
+
+Sprint
+Focus
+Key Tasks
+Deliverable
+S1  W1
+DB Migrations
+Add audit_logs, alerts, cohort_benchmarks tables via Alembic. Add CI columns to predictions.
+Migrations applied, rollback tested
+S2  W2
+Confidence Bands
+Bootstrap sampling in predictor.py (100 iterations). Update /predict response schema. Pydantic schema v2.
+CI values returned from /predict
+S3  W3
+Audit + Alerts BE
+Audit logging middleware (FastAPI middleware pattern). Alert auto-trigger in predict service. Alert API endpoints.
+Audit logs + alerts created on predict
+S4  W4
+Benchmark Job
+APScheduler nightly job computing cohort stats. /api/benchmarks endpoint. Redis caching layer.
+Benchmark data queryable via API
+S5  W5
+Enhanced PDF Core
+WeasyPrint setup. HTML template for all 11 sections. Chart PNG embedding via kaleido.
+Full PDF generated for test prediction
+S6  W6
+PDF Longitudinal & Benchmark
+Conditional longitudinal section logic. Benchmark box-plot chart generation. Report hash storage.
+Complete v2.0 PDF with all sections
+S7  W7–8
+Frontend — Dashboard & Alerts
+Dashboard donut chart, sparkline. /alerts page. /audit page (admin). Notification badge in header.
+Alerts and audit UI live
+S8  W9–10
+Frontend — Patient & Results
+Longitudinal trend chart on patient profile. Cohort benchmark panel on results. CI bands on RiskCard. /onboarding wizard. /benchmarks page.
+All new frontend features integrated
+
+8.3  Testing Requirements for v2.0
+
+Bootstrap CI: verify CI width narrows with sample count; verify deterministic seed produces same CI.
+Audit log: every API call to predict, report, patient view must create audit_log entry — write integration test.
+Alerts: simulate Comorbid prediction → assert alert created → assert email sent (mock SendGrid).
+Benchmark job: run nightly job on test DB → assert cohort_benchmarks rows created for all 13 taxa × 4 tiers.
+PDF: render test report → assert all 11 sections present → assert charts embedded → assert SHA-256 stored.
+Longitudinal: submit 3 analyses for same patient → assert trend endpoint returns 3 ordered entries.
+
+
+9.  Non-Functional Requirements  (v2.0 Updated)
+
+
+Requirement
+Target
+Prediction Latency (incl. CI)
+< 500ms per single sample (bootstrap adds ~300ms vs v1.0's 200ms)
+Batch Prediction
+< 5 seconds for 100-sample CSV
+PDF Generation (v2.0 full report)
+< 8 seconds (up from 3s — richer content)
+Benchmark Job
+< 5 minutes nightly; fails gracefully, alerts admin on failure
+API Uptime
+> 99.5% monthly SLA
+Concurrent Users
+50 concurrent clinicians per hospital instance
+Audit Log Write Latency
+< 50ms async — must not slow API responses
+Alert Delivery
+In-app < 5s; email < 60s after trigger event
+Data Privacy
+HIPAA-aligned: pseudonymized IDs, AES-256 at rest, TLS 1.3 in transit, audit logs immutable
+Authentication
+JWT 24h expiry, refresh token rotation, 5-fail lockout, brute force protection
+Audit Retention
+7 years minimum (HIPAA standard); configurable per hospital
+Accessibility
+WCAG 2.1 AA — colour-blind safe palette, screen reader labels on all charts
+Browser Support
+Chrome 100+, Firefox 100+, Safari 15+, Edge 100+
+
+
+10.  Folder Structure Addendum  (v2.0 New Files)
+
+
+Only new files/directories added by v2.0 are shown below. All v1.0 structure is preserved.
+
+10.1  Backend Additions
+
+neurogut-backend/
+├── api/
+│   ├── alerts.py              # GET /api/alerts, PATCH /api/alerts/{id}/resolve
+│   └── audit.py               # GET /api/audit (admin)
+├── services/
+│   ├── alert_service.py       # Alert trigger logic, email dispatch
+│   ├── benchmark_job.py       # APScheduler nightly cohort stats job
+│   ├── bootstrap_ci.py        # Bootstrap confidence interval computation
+│   └── pdf_generator_v2.py    # WeasyPrint HTML-template PDF (replaces ReportLab for full report)
+├── templates/
+│   └── report_v2.html         # Jinja2 HTML template for PDF rendering
+├── middleware/
+│   └── audit_middleware.py    # FastAPI middleware — auto-log all qualifying requests
+└── db/
+    └── migrations/
+        ├── 002_audit_alerts.py
+        └── 003_cohort_benchmarks.py
+
+10.2  Frontend Additions
+
+neurogut-frontend/app/
+├── alerts/page.tsx              # Alerts centre
+├── audit/page.tsx               # Audit log (admin)
+├── benchmarks/page.tsx          # Cohort benchmarking page
+├── onboarding/page.tsx          # First-login setup wizard
+neurogut-frontend/components/
+├── charts/
+│   ├── LongitudinalTrend.tsx    # Patient risk over time
+│   └── CohortBenchmark.tsx      # Box-whisker cohort comparison
+├── prediction/
+│   └── ConfidenceBand.tsx       # CI visualisation for RiskCard
+└── alerts/
+    ├── AlertBadge.tsx           # Header notification badge
+    └── AlertCard.tsx            # Individual alert item
+
+
+Appendix A  —  AI IDE Context Block  (v2.0)
+
+
+Paste this block at the start of every AI IDE session working on v2.0 features.
+
+Project: NEUROGUT v2.0 — Hospital-facing gut microbiome diagnostic platform
+ML Model: GutMicrobiomeStacker (RF MultiOutput + XGB ClassifierChain + LR meta-learner)
+Task: Multi-label binary — Depression (0/1) + Anxiety (0/1); v2.0 adds bootstrap CI
+Features: 13 bacterial taxa (Lachnospira, Ruthenibacterium, Veillonella, Gardnerella,
+          Pseudobutyrivibrio, Kocuria, Trueperella, Lancefieldella, Fructilactobacillus,
+          Lachnoanaerobaculum, Corynebacterium, Raoultella, Lawsonella)
+Backend: FastAPI (Python 3.11) + PostgreSQL 16 + joblib + APScheduler + SendGrid
+Frontend: Next.js 14 + TypeScript + Tailwind + shadcn/ui + Plotly.js + Recharts
+PDF: WeasyPrint + Jinja2 HTML template + kaleido for chart PNG export
+New v2.0 tables: audit_logs, alerts, cohort_benchmarks
+New v2.0 API: /trend, /benchmarks, /alerts, /audit
+End User: Hospital clinicians and researchers — HIPAA-aligned design
+
+Appendix B  —  Bacterial Taxa Clinical Reference
+
+
+Taxon
+Role
+Clinical Notes
+Gardnerella
+Pathological
+Primary pathological driver — highest importance in RF + XGB. Elevated in Comorbid. Severity marker.
+Corynebacterium
+Pathological
+Core diagnostic driver — strong spike in Depression and Comorbid conditions.
+Veillonella
+Pathological
+Elevated in Comorbid. Inflammation-associated.
+Lachnospira
+Protective
+Butyrate producer. Depleted in Depression/Comorbid. Low value = risk signal.
+Pseudobutyrivibrio
+Protective
+Butyrate and gut barrier function. Depleted in disease states.
+Fructilactobacillus
+Comorbidity Marker
+Spikes only in Comorbid, not Depression-only. Key for label separation.
+Trueperella
+Differentiation
+Helps distinguish Depression vs Comorbid.
+Lawsonella
+Pathological
+Secondary driver — co-elevates with Gardnerella in severe cases.
+Ruthenibacterium
+Emerging
+Secondary importance in XGB chain.
+Kocuria
+Context-dep.
+Moderate importance across conditions.
+Lancefieldella
+Secondary
+Lower importance — contextual signal.
+Lachnoanaerobaculum
+Secondary
+Oral-gut axis microbe.
+Raoultella
+Secondary
+Oxidative stress association.
+
+
+— End of Document —
+© 2025 NEUROGUT Capstone Project  •  Milan Agarwal  •  Confidential

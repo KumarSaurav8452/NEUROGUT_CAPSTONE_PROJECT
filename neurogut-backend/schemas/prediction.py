@@ -48,6 +48,12 @@ class PredictionOutput(BaseModel):
     consensus_features: list[str]
     processing_time_ms: int
     model_version: str
+    # v2.0: Confidence intervals
+    depression_ci_low: float | None = None
+    depression_ci_high: float | None = None
+    anxiety_ci_low: float | None = None
+    anxiety_ci_high: float | None = None
+    bootstrap_iterations: int | None = None
 
 
 class BatchPredictionInput(BaseModel):
