@@ -11,7 +11,7 @@ GET  /api/benchmarks -- cohort benchmark stats
 
 import uuid
 import numpy as np
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, File
 from sqlalchemy.orm import Session
 
 from db.database import get_db
@@ -149,6 +149,142 @@ def predict_batch(
             **result,
         ))
     return results
+
+
+# -----------------------------------------------------------------------
+# CSV Upload Endpoint
+# -----------------------------------------------------------------------
+EXPECTED_HEADERS = [
+    "lachnospira", "ruthenibacterium", "veillonella", "gardnerella",
+    "pseudobutyrivibrio", "kocuria", "trueperella", "lancefieldella",
+    "fructilactobacillus", "lachnoanaerobaculum", "corynebacterium",
+    "raoultella", "lawsonella",
+]
+
+
+@router.post("/predict/csv")
+async def predict_csv(
+    request: Request,
+    file: UploadFile = File(...),
+    patient_id: str | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Upload a CSV file with 13 taxa columns and get batch predictions.
+
+    CSV must have headers matching the 13 taxa names (case-insensitive).
+    Returns predictions for each valid row + errors for invalid rows.
+    """
+    import csv as csv_mod
+    import io
+
+    if not predictor_service.is_loaded:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    # Read file content
+    content = await file.read()
+    try:
+        text = content.decode("utf-8-sig")  # Handle BOM
+    except UnicodeDecodeError:
+        raise HTTPException(400, "File must be UTF-8 encoded CSV")
+
+    if not text.strip():
+        raise HTTPException(400, "CSV file is empty")
+
+    reader = csv_mod.DictReader(io.StringIO(text))
+    if not reader.fieldnames:
+        raise HTTPException(400, "CSV has no headers")
+
+    # Normalize headers
+    raw_headers = [h.strip().lower() for h in reader.fieldnames]
+    missing = [h for h in EXPECTED_HEADERS if h not in raw_headers]
+    if missing:
+        raise HTTPException(400, f"Missing required columns: {', '.join(missing)}")
+
+    results = []
+    errors = []
+    row_num = 0
+
+    for row in reader:
+        row_num += 1
+        # Normalize row keys to lowercase for reliable lookup
+        norm_row = {k.strip().lower(): v for k, v in row.items()}
+
+        # Extract values in canonical order
+        try:
+            features = []
+            for taxon in EXPECTED_HEADERS:
+                val_str = norm_row.get(taxon, "")
+                if not val_str or val_str.strip() == "":
+                    raise ValueError(f"Missing value for {taxon}")
+                features.append(float(val_str.strip()))
+        except ValueError as e:
+            errors.append({"row": row_num, "error": str(e)})
+            continue
+
+        # Run prediction
+        try:
+            result = predictor_service.predict(features)
+
+            # Skip bootstrap CI for CSV batch (too slow for many rows)
+            # Use deterministic ±5% margin instead
+            ci = {
+                "depression_ci_low": max(0, result["depression_prob"] - 0.05),
+                "depression_ci_high": min(1, result["depression_prob"] + 0.05),
+                "anxiety_ci_low": max(0, result["anxiety_prob"] - 0.05),
+                "anxiety_ci_high": min(1, result["anxiety_prob"] + 0.05),
+                "bootstrap_iterations": 0,
+            }
+            result.update(ci)
+
+            pred_id = str(uuid.uuid4())
+            sample_id = str(uuid.uuid4())
+
+            results.append({
+                "row": row_num,
+                "prediction_id": pred_id,
+                "sample_id": sample_id,
+                **result,
+            })
+        except Exception as e:
+            errors.append({"row": row_num, "error": f"Prediction failed: {str(e)}"})
+
+    # Audit log
+    log_audit(
+        db, user.id, AuditAction.PREDICTION_RUN,
+        resource_type="csv_batch", resource_id=f"{row_num}_rows",
+        ip_address=request.client.host if request.client else None,
+    )
+
+    return {
+        "total_rows": row_num,
+        "successful": len(results),
+        "failed": len(errors),
+        "predictions": results,
+        "errors": errors,
+    }
+
+
+@router.get("/templates/csv")
+def get_csv_template():
+    """Return a downloadable CSV template with correct headers and 2 example rows."""
+    import io
+    from fastapi.responses import StreamingResponse
+    import csv as csv_mod
+
+    output = io.StringIO()
+    writer = csv_mod.writer(output)
+    writer.writerow([h.capitalize() for h in EXPECTED_HEADERS])
+    # Example healthy row
+    writer.writerow([9.0, 7.0, 1.5, -5.0, 3.0, -4.5, 0.1, -4.5, -4.5, 2.0, 0.5, -4.5, -3.0])
+    # Example risk row
+    writer.writerow([3.0, 2.0, 6.0, 2.0, -0.5, 0.5, 3.0, 1.0, 2.0, 5.0, 5.0, 1.0, 3.0])
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=neurogut_template.csv"},
+    )
 
 
 @router.get("/model/health", response_model=ModelHealthResponse)

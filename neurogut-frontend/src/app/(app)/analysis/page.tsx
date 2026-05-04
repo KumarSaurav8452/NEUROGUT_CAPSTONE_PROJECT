@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { TAXA_NAMES, TAXA_DISPLAY, RISK_CONFIG, TAXA_CLINICAL_INFO } from "@/lib/types";
 import type { PredictionInput, PredictionResult, Patient } from "@/lib/types";
-import { FlaskConical, Download, RotateCcw, Brain, Heart, Users } from "lucide-react";
+import { FlaskConical, Download, RotateCcw, Brain, Heart, Users, Upload, SlidersHorizontal } from "lucide-react";
 import dynamic from "next/dynamic";
+import CsvUploadPanel from "@/components/CsvUploadPanel";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -17,6 +18,7 @@ const DEFAULT_VALUES: PredictionInput = {
 };
 
 export default function AnalysisPage() {
+  const [inputMode, setInputMode] = useState<"manual" | "csv">("manual");
   const [values, setValues] = useState<PredictionInput>({ ...DEFAULT_VALUES });
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,10 +92,41 @@ export default function AnalysisPage() {
     <>
       <div className="page-header">
         <h1>New Microbiome Analysis</h1>
-        <p>Enter 13 bacterial taxa abundances to predict Depression &amp; Anxiety risk</p>
+        <p>Enter 13 bacterial taxa abundances or upload a CSV file for batch prediction</p>
       </div>
 
       <div className="page-body">
+        {/* Input mode tabs */}
+        <div style={{ display: "flex", gap: 4, marginBottom: 16, background: "var(--bg-secondary)", borderRadius: 10, padding: 4, width: "fit-content" }}>
+          <button
+            onClick={() => setInputMode("manual")}
+            style={{
+              padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
+              background: inputMode === "manual" ? "white" : "transparent",
+              color: inputMode === "manual" ? "var(--primary)" : "var(--text-tertiary)",
+              boxShadow: inputMode === "manual" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}
+          >
+            <SlidersHorizontal size={14} /> Manual Input
+          </button>
+          <button
+            onClick={() => setInputMode("csv")}
+            style={{
+              padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
+              background: inputMode === "csv" ? "white" : "transparent",
+              color: inputMode === "csv" ? "var(--primary)" : "var(--text-tertiary)",
+              boxShadow: inputMode === "csv" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}
+          >
+            <Upload size={14} /> CSV Upload
+          </button>
+        </div>
+
+        {inputMode === "csv" ? (
+          <CsvUploadPanel />
+        ) : (
         <div style={{ display: "grid", gridTemplateColumns: result ? "380px 1fr" : "1fr", gap: 24 }}>
           {/* ── Input Panel ── */}
           <div className="card" style={{ padding: 24 }}>
@@ -309,9 +342,9 @@ export default function AnalysisPage() {
                       [1, "#DC2626"],
                     ],
                     showscale: true,
-                    colorbar: { title: "Abundance", titleside: "right", thickness: 12, len: 0.9 },
+                    colorbar: { title: { text: "Abundance", side: "right" }, thickness: 12, len: 0.9 },
                     hoverongaps: false,
-                    text: [TAXA_NAMES.map(t => `${TAXA_DISPLAY[t]}: ${values[t].toFixed(2)}`)],
+                    text: TAXA_NAMES.map(t => `${TAXA_DISPLAY[t]}: ${values[t].toFixed(2)}`),
                     hoverinfo: "text",
                   }]}
                   layout={{
@@ -399,7 +432,7 @@ export default function AnalysisPage() {
                       height: 320,
                       paper_bgcolor: "transparent",
                       plot_bgcolor: "transparent",
-                      xaxis: { title: "Importance", titlefont: { size: 11 } },
+                      xaxis: { title: { text: "Importance", font: { size: 11 } } },
                       yaxis: { tickfont: { size: 10, family: "JetBrains Mono, monospace" }, autorange: "reversed" as const },
                       font: { family: "Inter" },
                     }}
@@ -480,7 +513,7 @@ export default function AnalysisPage() {
                       paper_bgcolor: "transparent",
                       plot_bgcolor: "transparent",
                       xaxis: { tickangle: -45, tickfont: { size: 9, family: "Inter" } },
-                      yaxis: { title: "Abundance", titlefont: { size: 10 }, zeroline: true, zerolinecolor: "#E5E7EB" },
+                      yaxis: { title: { text: "Abundance", font: { size: 10 } }, zeroline: true, zerolinecolor: "#E5E7EB" },
                       font: { family: "Inter" },
                       shapes: [{ type: "line", y0: 0, y1: 0, x0: -0.5, x1: 12.5, line: { color: "#9CA3AF", width: 1, dash: "dot" } }],
                     }}
@@ -505,6 +538,7 @@ export default function AnalysisPage() {
             </div>
           )}
         </div>
+        )}
       </div>
     </>
   );

@@ -110,7 +110,7 @@ export default function BenchmarksPage() {
                   height: 350, margin: { t: 20, b: 100, l: 50, r: 20 },
                   paper_bgcolor: "transparent", plot_bgcolor: "transparent",
                   xaxis: { tickangle: -45, tickfont: { size: 10, family: "Inter" } },
-                  yaxis: { title: "Abundance (CLR)", titlefont: { size: 11 }, zeroline: true, zerolinecolor: "#E5E7EB" },
+                  yaxis: { title: { text: "Abundance (CLR)", font: { size: 11 } }, zeroline: true, zerolinecolor: "#E5E7EB" },
                   font: { family: "Inter" },
                 }}
                 config={{ displayModeBar: false, responsive: true }}

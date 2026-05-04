@@ -1,0 +1,70 @@
+NEUROGUT
+Gut-Brain Axis Diagnostic Platform
+
+CSV Upload Feature
+Product Requirements Document  •  v3.0 Addendum
+
+1.  Feature Overview
+1.1  What This Addendum Covers
+The NEUROGUT v1.0 and v2.0 PRDs established a world-class Gut-Brain Axis diagnostic platform with manual 13-taxon slider input and a researcher batch route (/research/batch). However, the live website currently lacks a fully implemented CSV Upload feature — the ability for clinicians and researchers to upload structured CSV files containing one or more patient microbiome samples for automated batch prediction.
+
+This addendum specifies the complete CSV Upload feature as a production-ready, self-contained module that integrates with the existing v2.0 tech stack.
+
+1.2  Problem Statement
+Clinicians processing multiple patients per session cannot feasibly enter 13 taxon values manually for each patient.
+Labs and sequencing facilities deliver microbiome data as CSV exports — the platform must accept this format natively.
+Researchers running validation studies need to submit 10–500 samples per batch without per-record manual entry.
+The existing /research/batch route is defined in the site map but has no detailed spec for validation, parsing, preview, or error recovery.
+
+1.3  Goals
+
+2.  CSV Format Specification
+2.1  Standard Column Schema
+Every uploaded CSV must conform to the following column schema. Column order is fixed. Headers must match exactly (case-insensitive). All 13 taxon columns represent relative abundance values in the range 0.0 – 1.0.
+
+
+2.2  Example CSV Templates
+Four template CSV files accompany this PRD. Each represents a different clinical scenario:
+
+
+2.3  Taxon Value Reference — Expected Ranges by Risk Tier
+
+3.  Technology Stack — CSV Upload Module
+3.1  Frontend Libraries
+
+3.2  Backend Libraries & Services
+
+3.3  New API Endpoints
+
+4.  User Experience Flow
+4.1  Clinician — Single Patient CSV Upload (Analysis Wizard)
+The CSV upload option appears as a tab on the /analysis/new Sample Input step, alongside the existing manual slider input. This is the primary entry point for individual patient uploads.
+
+
+4.2  Researcher — Batch Upload (Up to 500 Rows)
+The /research/batch page provides a dedicated batch upload workflow for researchers. Results are returned as a downloadable CSV and viewable in a results dashboard.
+
+
+4.3  Error Handling — Detailed Behaviour
+
+5.  Backend Architecture
+5.1  Request Processing Pipeline
+The following describes the server-side processing pipeline for a CSV upload request, from receipt to prediction storage.
+
+
+5.2  New Database Tables
+Table: csv_uploads
+
+6.  Security & Compliance
+6.1  HIPAA Controls for CSV Uploads
+
+7.  Testing Plan — CSV Upload Feature
+7.1  Test Scenarios Using Provided CSV Templates
+
+7.2  Automated Test Suite
+pytest: test_csv_upload.py — covers all 10 scenarios above with parametrized fixtures.
+PapaParse unit tests (Jest): validate client-side parsing for all 4 CSV templates.
+Playwright E2E: drag-and-drop upload flow on /analysis/new and /research/batch.
+Load test: Locust — 50 concurrent 10-row batch uploads. Target: < 15s p95 for batch completion.
+
+8.  Implementation Checklist
