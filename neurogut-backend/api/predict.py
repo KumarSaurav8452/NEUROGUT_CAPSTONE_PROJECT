@@ -107,6 +107,13 @@ def predict_single(
             resource_type="prediction", resource_id=prediction_id,
             ip_address=request.client.host if request.client else None,
         )
+
+        # v2.0: Recompute cohort benchmarks (lightweight, ~50ms)
+        try:
+            from services.benchmark_job import compute_cohort_benchmarks
+            compute_cohort_benchmarks(db)
+        except Exception:
+            pass
     except Exception:
         db.rollback()
 
