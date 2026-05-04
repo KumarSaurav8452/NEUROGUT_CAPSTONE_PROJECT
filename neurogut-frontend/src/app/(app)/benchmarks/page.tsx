@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { api } from "@/lib/api";
 import type { CohortBenchmark } from "@/lib/types";
 import { BarChart3 } from "lucide-react";
 import dynamic from "next/dynamic";
-const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false, loading: () => <div style={{ height: 350, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="spinner" /></div> });
 
 const TIERS = ["healthy", "depression_only", "anxiety_only", "comorbid"];
 const TIER_LABELS: Record<string, string> = {
@@ -17,11 +17,33 @@ const TIER_COLORS: Record<string, string> = {
 export default function BenchmarksPage() {
   const [benchmarks, setBenchmarks] = useState<CohortBenchmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTier, setSelectedTier] = useState("healthy");
+  const [selectedTier, setSelectedTier] = useState("");
 
   useEffect(() => {
-    api.getBenchmarks().then(setBenchmarks).catch(() => {}).finally(() => setLoading(false));
+    api.getBenchmarks()
+      .then((data) => {
+        setBenchmarks(data);
+        // Auto-select first tier that has data
+        if (data.length > 0) {
+          const tiersWithData = TIERS.filter((t) => data.some((b) => b.risk_tier === t));
+          setSelectedTier(tiersWithData[0] || "healthy");
+        } else {
+          setSelectedTier("healthy");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  // Count samples per tier for badges
+  const tierCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const t of TIERS) {
+      const tierItems = benchmarks.filter((b) => b.risk_tier === t);
+      counts[t] = tierItems.length > 0 ? tierItems[0].sample_count : 0;
+    }
+    return counts;
+  }, [benchmarks]);
 
   const tierData = benchmarks.filter((b) => b.risk_tier === selectedTier);
   const taxa = tierData.map((b) => b.taxon_name);
@@ -40,12 +62,21 @@ export default function BenchmarksPage() {
         <div className="card" style={{ padding: "12px 20px", marginBottom: 16, display: "flex", gap: 10, alignItems: "center" }}>
           {TIERS.map((t) => (
             <button key={t} className={`btn ${selectedTier === t ? "btn-primary" : "btn-secondary"}`}
-              style={{ fontSize: 12, padding: "4px 14px" }} onClick={() => setSelectedTier(t)}>
+              style={{ fontSize: 12, padding: "4px 14px", opacity: tierCounts[t] === 0 ? 0.5 : 1 }}
+              onClick={() => setSelectedTier(t)}>
               {TIER_LABELS[t]}
+              {tierCounts[t] > 0 && (
+                <span style={{
+                  marginLeft: 6, fontSize: 10, background: selectedTier === t ? "rgba(255,255,255,0.3)" : "var(--bg-secondary)",
+                  padding: "1px 5px", borderRadius: 8,
+                }}>
+                  {tierCounts[t]}
+                </span>
+              )}
             </button>
           ))}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-tertiary)" }}>
-            {tierData.length > 0 ? `${tierData[0]?.sample_count || 0} samples in cohort` : "No data"}
+            {tierData.length > 0 ? `${tierData[0]?.sample_count || 0} samples in cohort` : "No data for this tier"}
           </span>
         </div>
 
@@ -53,11 +84,16 @@ export default function BenchmarksPage() {
           <div style={{ textAlign: "center", padding: 40 }}><div className="spinner" /></div>
         ) : tierData.length === 0 ? (
           <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)" }}>
-            No benchmark data for this tier yet. Run more analyses to build cohort statistics.
+            No benchmark data for <b>{TIER_LABELS[selectedTier] || "this"}</b> tier yet. Run more analyses to build cohort statistics.
+            {benchmarks.length > 0 && (
+              <p style={{ marginTop: 8, fontSize: 12 }}>
+                Try switching to a tier with data: {TIERS.filter(t => tierCounts[t] > 0).map(t => TIER_LABELS[t]).join(", ") || "none"}
+              </p>
+            )}
           </div>
         ) : (
           <>
-            {/* Box-plot style chart */}
+            {/* Bar chart */}
             <div className="card" style={{ padding: "16px 20px", marginBottom: 16 }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Taxa Distribution — {TIER_LABELS[selectedTier]}</h3>
               <Plot
