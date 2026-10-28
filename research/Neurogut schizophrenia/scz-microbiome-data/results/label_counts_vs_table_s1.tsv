@@ -1,0 +1,16 @@
+study_id	group	expected_raw	labelled	status
+Li_2023_SCZ	Healthy	36	36	PASS
+Li_2023_SCZ	SCZ	19	19	PASS
+Li_2023_SCZ	Exclude		21	
+Xu_2020_SCZ	Healthy	0	0	PASS
+Xu_2020_SCZ	SCZ	40	40	PASS
+Xu_2020_SCZ	Exclude		88	
+Zhu_2020A_SCZ	Healthy	81	81	PASS
+Zhu_2020A_SCZ	SCZ	90	90	PASS
+Zhu_2020A_SCZ	Exclude		38	
+Zhu_2020B_SCZ	Healthy	45	45	PASS
+Zhu_2020B_SCZ	SCZ	45	45	PASS
+Zhu_2020B_SCZ	Exclude		58	
+Thirion_2023A_SCZ	Healthy	174	257	FAIL
+Thirion_2023A_SCZ	SCZ	132	132	PASS
+Thirion_2023A_SCZ	Exclude		0	

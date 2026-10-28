@@ -1,0 +1,295 @@
+{
+ "disease": "pd",
+ "label": "Parkinson's disease",
+ "version": "v2.0-deploy",
+ "features": [
+  "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_oris",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_dentium",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_intestinalis",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_faecis",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Fusicatenibacter|s__Fusicatenibacter_saccharivorans",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae|g__Eubacterium|s__Eubacterium_sp_CAG_38",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_299",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Hungatella|s__Hungatella_hathewayi",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_58",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_rhamnosus",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_mutans",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_fermentum",
+  "k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_indistinctus",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Blautia_wexlerae",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Eisenbergiella|s__Eisenbergiella_tayi",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_hadrus",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Agathobaculum|s__Agathobaculum_butyriciproducens",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium",
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Megasphaera",
+  "k__Bacteria|p__Firmicutes|c__Erysipelotrichia|o__Erysipelotrichales|f__Erysipelotrichaceae|g__Turicibacter",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruthenibacterium",
+  "k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia",
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Acidaminococcales|f__Acidaminococcaceae|g__Acidaminococcus",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia"
+ ],
+ "display": {
+  "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii": "s__Methanobrevibacter_smithii",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_oris": "s__Actinomyces_oris",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_dentium": "s__Bifidobacterium_dentium",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_intestinalis": "s__Roseburia_intestinalis",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_faecis": "s__Roseburia_faecis",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Fusicatenibacter|s__Fusicatenibacter_saccharivorans": "s__Fusicatenibacter_saccharivorans",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae|g__Eubacterium|s__Eubacterium_sp_CAG_38": "s__Eubacterium_sp_CAG_38",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_299": "s__Clostridium_sp_CAG_299",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Hungatella|s__Hungatella_hathewayi": "s__Hungatella_hathewayi",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_58": "s__Clostridium_sp_CAG_58",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_rhamnosus": "s__Lactobacillus_rhamnosus",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_mutans": "s__Streptococcus_mutans",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_fermentum": "s__Lactobacillus_fermentum",
+  "k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_indistinctus": "s__Alistipes_indistinctus",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Blautia_wexlerae": "s__Blautia_wexlerae",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Eisenbergiella|s__Eisenbergiella_tayi": "s__Eisenbergiella_tayi",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_hadrus": "s__Anaerostipes_hadrus",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Agathobaculum|s__Agathobaculum_butyriciproducens": "s__Agathobaculum_butyriciproducens",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium": "g__Faecalibacterium",
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Megasphaera": "g__Megasphaera",
+  "k__Bacteria|p__Firmicutes|c__Erysipelotrichia|o__Erysipelotrichales|f__Erysipelotrichaceae|g__Turicibacter": "g__Turicibacter",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruthenibacterium": "g__Ruthenibacterium",
+  "k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia": "g__Escherichia",
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Acidaminococcales|f__Acidaminococcaceae|g__Acidaminococcus": "g__Acidaminococcus",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae": "f__Lactobacillaceae",
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae": "f__Enterococcaceae",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae": "f__Bifidobacteriaceae",
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae": "f__Actinomycetaceae",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes": "g__Anaerostipes",
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia": "g__Blautia"
+ },
+ "floor_pct": 0.01,
+ "threshold": 0.5840606363326929,
+ "tiers": {
+  "low": 0.35,
+  "high": 0.65
+ },
+ "reference": {
+  "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii": {
+   "healthy_mean": -1.5879181936883864,
+   "healthy_sd": 0.764936960105621,
+   "case_mean": -1.348078501682417,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_oris": {
+   "healthy_mean": -1.8998880266653635,
+   "healthy_sd": 0.25458930540632385,
+   "case_mean": -1.736493514745723,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_dentium": {
+   "healthy_mean": -1.8460148506833571,
+   "healthy_sd": 0.455027159917456,
+   "case_mean": -1.5681902734737987,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_intestinalis": {
+   "healthy_mean": -0.7670010355976918,
+   "healthy_sd": 0.9741685378239726,
+   "case_mean": -1.1441950092840938,
+   "healthy_median_pct": 0.23888000010000232
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_faecis": {
+   "healthy_mean": -0.7459454308135761,
+   "healthy_sd": 1.1691199792382099,
+   "case_mean": -1.0178998374788388,
+   "healthy_median_pct": 0.20126003970002593
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Fusicatenibacter|s__Fusicatenibacter_saccharivorans": {
+   "healthy_mean": -0.2414697780310803,
+   "healthy_sd": 1.0234441103637295,
+   "case_mean": -0.5665157408180145,
+   "healthy_median_pct": 1.5228799227845076
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae|g__Eubacterium|s__Eubacterium_sp_CAG_38": {
+   "healthy_mean": -1.3744121137989678,
+   "healthy_sd": 0.761006076981484,
+   "case_mean": -1.557487455852125,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_299": {
+   "healthy_mean": -1.6730505012962098,
+   "healthy_sd": 0.684759962486049,
+   "case_mean": -1.8632556755313898,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Hungatella|s__Hungatella_hathewayi": {
+   "healthy_mean": -1.766349966536712,
+   "healthy_sd": 0.44945419844069723,
+   "case_mean": -1.6373642027106374,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_sp_CAG_58": {
+   "healthy_mean": -0.9776856804860834,
+   "healthy_sd": 0.8086418522712823,
+   "case_mean": -1.165330807216049,
+   "healthy_median_pct": 0.1834300091550046
+  },
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_rhamnosus": {
+   "healthy_mean": -1.9192898289845,
+   "healthy_sd": 0.2659557808983465,
+   "case_mean": -1.8221572648129096,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_mutans": {
+   "healthy_mean": -1.9052953905090257,
+   "healthy_sd": 0.32642639726575134,
+   "case_mean": -1.7192822223923643,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_fermentum": {
+   "healthy_mean": -1.8810525373918785,
+   "healthy_sd": 0.4083917662995032,
+   "case_mean": -1.7489659673030682,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_indistinctus": {
+   "healthy_mean": -1.6634875136420408,
+   "healthy_sd": 0.5550844883225801,
+   "case_mean": -1.4781380528468637,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Blautia_wexlerae": {
+   "healthy_mean": -0.22503667387453224,
+   "healthy_sd": 0.9204137978624589,
+   "case_mean": -0.6884997476001723,
+   "healthy_median_pct": 0.727455108941518
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Eisenbergiella|s__Eisenbergiella_tayi": {
+   "healthy_mean": -1.7824375462964135,
+   "healthy_sd": 0.4269533161506215,
+   "case_mean": -1.5634620558643113,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_hadrus": {
+   "healthy_mean": -0.5103595046674932,
+   "healthy_sd": 0.9109148820884788,
+   "case_mean": -0.8086897289938463,
+   "healthy_median_pct": 0.538694786733106
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Agathobaculum|s__Agathobaculum_butyriciproducens": {
+   "healthy_mean": -1.011848065931071,
+   "healthy_sd": 0.8724552089144126,
+   "case_mean": -1.211370437067258,
+   "healthy_median_pct": 0.18441502787550468
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium": {
+   "healthy_mean": 0.20317151493405214,
+   "healthy_sd": 1.059191489645968,
+   "case_mean": -0.15330259561285572,
+   "healthy_median_pct": 5.056972719789643
+  },
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Megasphaera": {
+   "healthy_mean": -1.825920317995429,
+   "healthy_sd": 0.5671341863235686,
+   "case_mean": -1.6355736182561427,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Erysipelotrichia|o__Erysipelotrichales|f__Erysipelotrichaceae|g__Turicibacter": {
+   "healthy_mean": -1.9448178016450979,
+   "healthy_sd": 0.21742133885861412,
+   "case_mean": -1.823416037789138,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruthenibacterium": {
+   "healthy_mean": -0.6677591497814583,
+   "healthy_sd": 0.5861821626078977,
+   "case_mean": -0.35658767065815644,
+   "healthy_median_pct": 0.22149506643102213
+  },
+  "k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Escherichia": {
+   "healthy_mean": -1.406418486782022,
+   "healthy_sd": 0.9093050090467106,
+   "case_mean": -1.175148689978868,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Negativicutes|o__Acidaminococcales|f__Acidaminococcaceae|g__Acidaminococcus": {
+   "healthy_mean": -1.5779199873446474,
+   "healthy_sd": 0.883769544534237,
+   "case_mean": -1.3297225423437915,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae": {
+   "healthy_mean": -1.6314369792523553,
+   "healthy_sd": 0.6897186589778389,
+   "case_mean": -1.234793561510731,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae": {
+   "healthy_mean": -1.891252941082885,
+   "healthy_sd": 0.3964145165785976,
+   "case_mean": -1.6922397664414497,
+   "healthy_median_pct": 0.0
+  },
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae": {
+   "healthy_mean": -0.23155815053562298,
+   "healthy_sd": 1.0921392291391903,
+   "case_mean": 0.11008135059854769,
+   "healthy_median_pct": 0.9922547082817444
+  },
+  "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae": {
+   "healthy_mean": -1.5423217879005553,
+   "healthy_sd": 0.48466049211726114,
+   "case_mean": -1.4059285256407386,
+   "healthy_median_pct": 0.014655003666001254
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes": {
+   "healthy_mean": -0.3946022833901581,
+   "healthy_sd": 0.8004535552449158,
+   "case_mean": -0.7011164345547286,
+   "healthy_median_pct": 0.5932698540200729
+  },
+  "k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia": {
+   "healthy_mean": 0.7196264165699895,
+   "healthy_sd": 0.357088720975862,
+   "case_mean": 0.5265470361442415,
+   "healthy_median_pct": 5.1880852540396285
+  }
+ },
+ "metrics": {
+  "internal_auc": 0.722,
+  "internal_folds": [
+   {
+    "fold": "1",
+    "n": 145,
+    "roc_auc": 0.709
+   },
+   {
+    "fold": "2",
+    "n": 145,
+    "roc_auc": 0.732
+   },
+   {
+    "fold": "3",
+    "n": 145,
+    "roc_auc": 0.683
+   },
+   {
+    "fold": "4",
+    "n": 145,
+    "roc_auc": 0.699
+   },
+   {
+    "fold": "5",
+    "n": 144,
+    "roc_auc": 0.785
+   }
+  ],
+  "external_auc": null,
+  "external_folds": [],
+  "threshold": 0.584,
+  "balanced_accuracy_at_threshold": 0.674,
+  "f1_at_threshold": 0.688
+ },
+ "n_train": 724,
+ "n_cases": 490,
+ "source": "Wallen et al. 2022 Source Data (pd_repo/data/raw)"
+}

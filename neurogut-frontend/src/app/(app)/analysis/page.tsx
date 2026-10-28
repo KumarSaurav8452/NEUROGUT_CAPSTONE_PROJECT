@@ -374,8 +374,8 @@ export default function AnalysisPage() {
                         theta: rfKeys,
                         fill: "toself",
                         name: "Random Forest",
-                        fillcolor: "rgba(0,109,119,0.15)",
-                        line: { color: "#006D77", width: 2 },
+                        fillcolor: "rgba(0,71,171,0.15)",
+                        line: { color: "#0047AB", width: 2 },
                       },
                       {
                         type: "scatterpolar",
@@ -413,7 +413,7 @@ export default function AnalysisPage() {
                         x: rfVals,
                         orientation: "h" as const,
                         name: "Random Forest",
-                        marker: { color: "#006D77" },
+                        marker: { color: "#0047AB" },
                       },
                       {
                         type: "bar",
@@ -451,12 +451,12 @@ export default function AnalysisPage() {
                     {/* RF circle */}
                     <div style={{
                       position: "absolute", left: "15%", width: 180, height: 180, borderRadius: "50%",
-                      background: "rgba(0,109,119,0.12)", border: "2px solid #006D77",
+                      background: "rgba(0,71,171,0.12)", border: "2px solid #0047AB",
                       display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", paddingLeft: 16,
                     }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "#006D77", marginBottom: 6 }}>RF Only</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#0047AB", marginBottom: 6 }}>RF Only</div>
                       {[...rfTop5].filter(f => !xgbTop5.has(f)).map(f => (
-                        <div key={f} style={{ fontSize: 10, color: "#006D77", lineHeight: 1.5 }}>{f}</div>
+                        <div key={f} style={{ fontSize: 10, color: "#0047AB", lineHeight: 1.5 }}>{f}</div>
                       ))}
                     </div>
                     {/* XGB circle */}

@@ -56,7 +56,7 @@ export default function ModelPage() {
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Architecture</h3>
           {[
-            { l: "Base 1", v: "MultiOutputClassifier(RandomForest, n=100)", c: "#006D77" },
+            { l: "Base 1", v: "MultiOutputClassifier(RandomForest, n=100)", c: "#0047AB" },
             { l: "Base 2", v: "ClassifierChain(XGBoost, Depression->Anxiety)", c: "#3B82F6" },
             { l: "Meta", v: "MultiOutputClassifier(LogisticRegression)", c: "#A855F7" },
           ].map((i) => (
@@ -71,7 +71,7 @@ export default function ModelPage() {
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>CV Metrics (5-Fold)</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
-              { l: "Dep AUC", v: "0.945", c: "#006D77" },
+              { l: "Dep AUC", v: "0.945", c: "#0047AB" },
               { l: "Anx AUC", v: "0.893", c: "#3B82F6" },
               { l: "Dep F1", v: "0.933", c: "#22C55E" },
               { l: "Anx F1", v: "0.862", c: "#F59E0B" },

@@ -1,0 +1,4 @@
+set -euo pipefail
+export PATH="$HOME/micromamba/envs/scz-qc/bin":"$PATH"
+fastp -i '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/data/raw_fastq/Thirion_2023A_SCZ/ERR16139482/ERR16139482.fastq.gz' --stdout -w 8 --length_required 50 --disable_trim_poly_g -j '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Thirion_2023A_SCZ/Thirion_2023A_SCZ__SAMEA121025472/ERR16139482.fastp.json' -h '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Thirion_2023A_SCZ/Thirion_2023A_SCZ__SAMEA121025472/ERR16139482.fastp.html' 2> '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Thirion_2023A_SCZ/Thirion_2023A_SCZ__SAMEA121025472/ERR16139482.fastp.log' \
+  | bowtie2 -p 8 --very-sensitive -x "$HOME/scz-ref/GRCh38_noalt_as" -U -  -S /dev/null 2> '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Thirion_2023A_SCZ/Thirion_2023A_SCZ__SAMEA121025472/ERR16139482.bowtie2.log'

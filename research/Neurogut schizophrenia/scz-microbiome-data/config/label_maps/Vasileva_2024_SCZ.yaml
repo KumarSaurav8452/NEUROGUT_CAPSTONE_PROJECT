@@ -1,0 +1,14 @@
+# Vasileva et al. 2024 - UQ Research Data Manager (not public).
+# Expected drop-in: data/manual/Vasileva_2024_SCZ/metadata.csv with a `status` column.
+# Adjust the patterns once the real file arrives.
+study_id: Vasileva_2024_SCZ
+rules:
+  - field: attr_status
+    match: 'control|healthy|\bHC\b'
+    group: Healthy
+  - field: attr_status
+    match: 'schizophreni|\bSCZ\b|\bSZ\b|patient|case'
+    group: SCZ
+default:
+  group: Exclude
+  reason: unmapped status

@@ -1,0 +1,4 @@
+set -euo pipefail
+export PATH="$HOME/micromamba/envs/scz-qc/bin":"$PATH"
+fastp -i '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/data/raw_fastq/Xu_2020_SCZ/CNR0065810/wmb-101_combine_R1.fq.gz' -I '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/data/raw_fastq/Xu_2020_SCZ/CNR0065810/wmb-101_combine_R2.fq.gz' --stdout -w 8 --length_required 50 --detect_adapter_for_pe -j '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Xu_2020_SCZ/Xu_2020_SCZ__CNS0063952/CNR0065810.fastp.json' -h '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Xu_2020_SCZ/Xu_2020_SCZ__CNS0063952/CNR0065810.fastp.html' 2> '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Xu_2020_SCZ/Xu_2020_SCZ__CNS0063952/CNR0065810.fastp.log' \
+  | bowtie2 -p 8 --very-sensitive -x "$HOME/scz-ref/GRCh38_noalt_as" --interleaved -  -S /dev/null 2> '/mnt/c/Neurogut schizophrenia/scz-microbiome-data/results/qc/Xu_2020_SCZ/Xu_2020_SCZ__CNS0063952/CNR0065810.bowtie2.log'

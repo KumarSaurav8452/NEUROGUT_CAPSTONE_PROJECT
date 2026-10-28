@@ -1,6 +1,7 @@
 """
 NEUROGUT -- Patient & Sample Schemas (Pydantic)
 =================================================
+v4.0: Added UserRoleUpdate, InviteAccept, extended UserResponse with status/invite fields.
 """
 
 from typing import Optional
@@ -93,6 +94,9 @@ class UserResponse(BaseModel):
     full_name: str
     is_active: bool
     hospital_id: str
+    # v4.0: lifecycle fields
+    status: str = "active"
+    invite_expires_at: Optional[datetime] = None
     last_login_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
@@ -100,9 +104,22 @@ class UserResponse(BaseModel):
 
 
 class UserInvite(BaseModel):
+    """Admin creates a new user via invite (v4.0: replaces old invite with token-based flow)."""
     email: str
     role: str = Field("clinician", pattern="^(admin|clinician|researcher)$")
     full_name: str = ""
+    welcome_message: str = ""
+
+
+class UserRoleUpdate(BaseModel):
+    """Update a user's role."""
+    role: str = Field(..., pattern="^(admin|clinician|researcher)$")
+
+
+class InviteAccept(BaseModel):
+    """New user accepts an invite and sets their password."""
+    token: str
+    password: str = Field(..., min_length=8)
 
 
 # ---------------------------------------------------------------------------

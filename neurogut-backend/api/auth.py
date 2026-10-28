@@ -2,9 +2,11 @@
 NEUROGUT -- Authentication API
 ================================
 JWT login, token validation, role-based access middleware.
+v4.0: Added accept-invite endpoint for token-based user onboarding.
 """
 
 import os
+import hashlib
 import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -16,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from db.models import User
-from schemas.patient import LoginRequest, TokenResponse, UserResponse
+from schemas.patient import LoginRequest, TokenResponse, UserResponse, InviteAccept
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -97,7 +99,7 @@ def require_role(*roles: str):
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate with email + password, receive JWT."""
     user = db.query(User).filter(User.email == req.email).first()
-    if not user or not _verify_password(req.password, user.password_hash):
+    if not user or not user.password_hash or not _verify_password(req.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -123,3 +125,56 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 def get_me(user: User = Depends(get_current_user)):
     """Get current authenticated user info."""
     return user
+
+
+@router.post("/accept-invite", response_model=TokenResponse)
+def accept_invite(req: InviteAccept, db: Session = Depends(get_db)):
+    """
+    Accept an invitation token and set a new password.
+    Transitions user status: invited -> active.
+    Returns a JWT so the user is immediately logged in.
+    """
+    # Hash the submitted token to compare with stored hash
+    token_hash = hashlib.sha256(req.token.encode()).hexdigest()
+
+    # Find user by token hash
+    user = db.query(User).filter(User.invite_token_hash == token_hash).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or already-used invitation link",
+        )
+
+    # Check expiry
+    if user.invite_expires_at:
+        expires = user.invite_expires_at
+        # Make offset-aware if naive
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > expires:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invitation link has expired. Please ask your admin to resend.",
+            )
+
+    # Set password and activate user
+    user.password_hash = bcrypt.hashpw(
+        req.password.encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
+    user.status = "active"
+    user.is_active = True
+    user.invite_token_hash = None   # consume token
+    user.invite_expires_at = None
+    user.last_login_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+
+    # Issue JWT
+    token = create_access_token({"sub": user.id, "role": user.role, "hospital": user.hospital_id})
+    return TokenResponse(
+        access_token=token,
+        user_id=user.id,
+        role=user.role,
+        full_name=user.full_name,
+        hospital_id=user.hospital_id,
+    )

@@ -1,0 +1,28 @@
+experiment,design,fold,edges,communities,relaxed
+E1 genus+extras,internal,1,422,5,False
+E1 genus+extras,internal,2,460,5,False
+E1 genus+extras,internal,3,455,4,False
+E1 genus+extras,internal,4,457,3,False
+E1 genus+extras,internal,5,435,5,False
+E3 species+extras,internal,1,1607,4,False
+E3 species+extras,internal,2,1697,5,False
+E3 species+extras,internal,3,1663,5,False
+E3 species+extras,internal,4,1666,4,False
+E3 species+extras,internal,5,1571,6,False
+E5 species+extras harmonised,internal,1,246,5,False
+E5 species+extras harmonised,internal,2,237,5,False
+E5 species+extras harmonised,internal,3,311,5,False
+E5 species+extras harmonised,internal,4,268,6,False
+E5 species+extras harmonised,internal,5,240,5,False
+E1 genus+extras,loso,Li_2023_SCZ,471,3,False
+E1 genus+extras,loso,Thirion_2023A_SCZ,749,4,False
+E1 genus+extras,loso,Zhu_2020A_SCZ,14,6,False
+E1 genus+extras,loso,Zhu_2020B_SCZ,493,4,False
+E3 species+extras,loso,Li_2023_SCZ,1753,5,False
+E3 species+extras,loso,Thirion_2023A_SCZ,2448,5,False
+E3 species+extras,loso,Zhu_2020A_SCZ,9,4,False
+E3 species+extras,loso,Zhu_2020B_SCZ,1915,4,False
+E5 species+extras harmonised,loso,Li_2023_SCZ,270,5,False
+E5 species+extras harmonised,loso,Thirion_2023A_SCZ,371,5,False
+E5 species+extras harmonised,loso,Zhu_2020A_SCZ,9,4,False
+E5 species+extras harmonised,loso,Zhu_2020B_SCZ,176,4,False

@@ -1,5 +1,5 @@
 """
-NEUROGUT v2.0 -- FastAPI Application Entrypoint
+NEUROGUT v4.0 -- FastAPI Application Entrypoint
 ==================================================
 Run with:  uvicorn main:app --reload --port 8000
 From:      neurogut-backend/
@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Ensure package imports work
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from db.init_db import init_db, seed_demo_data
+from db.init_db import init_db, seed_demo_data, migrate_v4
 from services.predictor import predictor_service
 from services.benchmark_job import compute_cohort_benchmarks
 
@@ -27,6 +27,8 @@ from api.reports import router as reports_router
 from api.admin import router as admin_router
 from api.alerts import router as alerts_router
 from api.audit import router as audit_router
+from api.export import router as export_router
+from api.predict_v2 import router as predict_v2_router
 
 
 # ---------------------------------------------------------------------------
@@ -41,6 +43,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize database
     init_db()
+    migrate_v4()
     seed_demo_data()
 
     # Load ML model
@@ -54,7 +57,7 @@ async def lifespan(app: FastAPI):
         print(f"[Benchmark] Initial computation skipped: {e}")
 
     print("=" * 50)
-    print("NEUROGUT v2.0 Backend Ready!")
+    print("NEUROGUT v4.0 Backend Ready!")
     print("  API Docs: http://localhost:8000/docs")
     print("  Health:   http://localhost:8000/api/model/health")
     print("=" * 50)
@@ -76,7 +79,7 @@ app = FastAPI(
         "from gut microbiome composition. Now with confidence intervals, "
         "longitudinal tracking, cohort benchmarking, alerts, and audit trail."
     ),
-    version="2.0.0",
+    version="4.0.0",
     lifespan=lifespan,
 )
 
@@ -97,13 +100,15 @@ app.include_router(reports_router)
 app.include_router(admin_router)
 app.include_router(alerts_router)   # v2.0
 app.include_router(audit_router)    # v2.0
+app.include_router(export_router)   # v4.0: data export
+app.include_router(predict_v2_router)  # NeuroGut v2: PD / SCZ predictions
 
 
 @app.get("/")
 def root():
     return {
         "service": "NEUROGUT API",
-        "version": "2.0.0",
+        "version": "4.0.0",
         "docs": "/docs",
         "health": "/api/model/health",
     }

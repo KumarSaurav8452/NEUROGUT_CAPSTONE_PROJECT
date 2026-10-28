@@ -252,3 +252,12 @@ neurogut-backend/reports/*.pdf
 
 # AGENTS.md
 AGENTS.md
+
+# Research workspace (copied 28 Oct 2026): large data and a nested git clone, never commit
+research/Neurogut schizophrenia/external_repos/
+research/Neurogut schizophrenia/scz-microbiome-data/data/
+research/Neurogut schizophrenia/scz-microbiome-data/logs/
+research/Neurogut schizophrenia/scz-ml/results/models/
+research/Neurogut schizophrenia/scz-ml/results*/parts/
+research/Neurogut schizophrenia/scz-ml/results_quick/
+research/Neurogut schizophrenia/GutMIND*.pdf

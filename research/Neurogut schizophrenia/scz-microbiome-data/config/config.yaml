@@ -1,0 +1,204 @@
+# Pipeline parameters. Everything tunable lives here (PRD §6.1).
+
+paths:
+  table_s1: data/sTable1.xlsx
+  studies: config/studies.yaml
+  label_maps: config/label_maps
+  raw_metadata: data/raw_metadata
+  labelled: data/labelled
+  filtered: data/filtered
+  raw_fastq: data/raw_fastq
+  qc_read_counts: results/qc/read_counts.tsv            # FR-6 output; until it exists the depth filter is pending
+                                                        # host_removed_reads counts single reads (both mates for PE)
+  unclassified: results/profiles/metaphlan_unclassified.tsv  # FR-7 output; until it exists that filter is pending
+  read_estimates: results/qc/read_estimates.tsv          # profile mode: estimated full-depth host-removed reads
+  manual: data/manual
+  cache: data/cache
+  logs: logs
+  results: results
+
+table_s1:
+  sheet: Table S1
+  abbreviation: SCZ          # disease filter for this PRD
+
+http:
+  timeout_s: 120
+  retries: 5
+  backoff_base_s: 2          # wait = base ** attempt
+  min_interval_s: 0.34       # polite rate limit, per host
+  user_agent: "scz-microbiome-data/0.1 (research pipeline; contact via repo owner)"
+  head_workers: 6            # parallel HEAD requests for file sizes
+
+ena:
+  portal: https://www.ebi.ac.uk/ena/portal/api
+  browser: https://www.ebi.ac.uk/ena/browser/api
+  sample_xml_batch: 100
+  run_fields:
+    - run_accession
+    - sample_accession
+    - secondary_sample_accession
+    - experiment_accession
+    - study_accession
+    - sample_alias
+    - sample_title
+    - library_strategy
+    - library_source
+    - library_selection
+    - library_layout
+    - instrument_platform
+    - instrument_model
+    - read_count
+    - base_count
+    - fastq_ftp
+    - fastq_md5
+    - fastq_bytes
+    - first_public
+
+cngb:
+  public_info: https://ftp.cngb.org/pub/CNSA/data7/public_info
+  ftp_root: https://ftp.cngb.org/pub/CNSA/data1
+
+gsa:
+  export_url: https://ngdc.cncb.ac.cn/gsa/file/exportExcelFile
+  download_root: https://download.cncb.ac.cn/gsa2
+
+# Per-study facts discovered in Phase 0 (docs/discovery.md) that Table S1 cannot carry.
+study_overrides:
+  Xu_2020_SCZ:
+    disease_only: true                 # no healthy controls (PRD special case 2)
+  Zhu_2020A_SCZ:
+    platform_split: ILLUMINA           # CNP0000119 runs with this platform -> A
+    ena_mirror: PRJEB29127             # same runs on ENA; ENA sample_alias == CNGB sample accession
+  Zhu_2020B_SCZ:
+    platform_split: BGISEQ
+  Thirion_2023A_SCZ:
+    # Table S1 lists only the SCZ project; controls were deposited separately.
+    accessions: [PRJEB41217, PRJEB41786, PRJEB41787]
+    bmi_filter: false                  # per-sample BMI not published -> filter skipped, gap reported
+  Vasileva_2024_SCZ:
+    manual: true
+
+filters:
+  shotgun_strategies: [WGS]            # FR-4 step 1; anything else (e.g. AMPLICON) is dropped and flagged
+  min_reads: 10000000                  # GutMIND Methods: < 10 M reads excluded
+  max_unclassified_frac: 0.30          # GutMIND Methods: > 30 % unclassified (MetaPhlAn 4) excluded
+  # Off: the 30 % cut-off was set on MetaPhlAn 4's unclassified fraction. MetaPhlAn 3's UNKNOWN estimate runs much
+  # higher (Zhu B: median 29.9 %, 49 % of samples > 30 %; GutMIND removed 1-2 per group), so applying it would
+  # drop about half the samples for a reason unrelated to quality. Bad samples are caught by profile_qc flags.
+  apply_unclassified_filter: false
+  unclassified_skip_reason: "30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable"
+  max_bmi: 30                          # GutMIND Methods: BMI > 30 excluded (NA kept)
+  count_tolerance: 2                   # PRD FR-4: +/- 2 per group
+  min_study_samples: 10                # GutMIND Methods: a study with < 10 samples left is discarded
+
+download:
+  parallel: 1                          # PRD default is 4; 1 on this laptop (stream mode, 26 GB free)
+  max_tries: 3                         # re-download on MD5 mismatch
+  retry_base_s: 2                      # wait base ** attempt seconds between tries
+  chunk_mb: 8
+  subset_strategy: smallest            # --subset N picks the N smallest samples per group (quick laptop tests)
+  manifest: results/download_manifest.tsv
+
+# Phase 3 stream mode: per sample download -> fastp -> bowtie2 host removal -> record counts -> delete raw.
+stream:
+  keep_raw: false                      # delete raw FASTQs once the sample's QC succeeded
+  keep_clean: false                    # true = keep host-removed reads (needed later for MetaPhlAn); false = counts only
+                                       # (false on this laptop: 22 GB free cannot hold the host-removed reads)
+  clean_dir: data/clean_fastq          # <StudyID>/<sample_id>/<sample_id>_R1.fq.gz [, _R2]
+  state_dir: data/qc_state             # one JSON per finished sample -> idempotent reruns
+  qc_dir: results/qc                   # fastp json/html + bowtie2 logs per run, read_counts.tsv
+  margin_gb: 3                         # keep at least this much free after a sample's worst case
+  clean_ratio: 1.0                     # worst-case host-removed output size relative to raw (keep_clean only)
+
+# Phase 3b "profile" mode (fits ~2-3 days at ~0.25 MB/s and ~20 GB disk): stream only the first N reads of each
+# sample from the archive (transfer stops there), then fastp | bowtie2 host removal | MetaPhlAn 3 (mpa_v30, the
+# database curatedMetagenomicData used). Full-depth read totals come from archive counts or file-size estimates.
+profile:
+  reads_per_sample:                    # reads per FASTQ file (PE: pairs)
+    default: 500000
+    Thirion_2023A_SCZ: 300000          # 389 samples, secondary (Ion Torrent, BMI filter skipped): lighter
+  study_order: [Zhu_2020B_SCZ, Li_2023_SCZ, Xu_2020_SCZ, Thirion_2023A_SCZ]   # core cohorts first
+  external_profiles:                   # studies with published profiles: no reads downloaded
+    Zhu_2020A_SCZ:
+      source: curatedMetagenomicData 2021-03-31 ZhuF_2020 (MetaPhlAn 3, mpa_v30, full depth)
+      relative_abundance: data/external/cmd/ZhuF_2020.relative_abundance.tsv
+      pathway_abundance: data/external/cmd/ZhuF_2020.pathway_abundance.tsv
+      key: sample_name                 # columns are BGI IDs (wHAXPI...) == our sample_name
+  bowtie2_args: "--sensitive"          # ~2x faster than --very-sensitive; enough to flag human reads
+  bytes_per_read_guess: 95             # gzip bytes per read for the transfer estimate (measured: 92 Xu, 130 Thirion)
+  prefetch: 14                         # subsamples downloaded ahead of QC/MetaPhlAn (~0.05-0.1 GB each on disk)
+  fetch_workers: 8                     # parallel downloads. ENA caps each connection: 28 Oct 00:25, 1 conn ~0.1 MB/s,
+                                       # 8 together ~0.65 MB/s (27 Oct: 1 -> 0.30, 3 -> 0.58). Thirion workers ~0.3 GB RAM each
+  sra_aws:                             # single-end studies read from NCBI's public AWS copy first (archive FASTQ = fallback)
+    # 27 Oct 2026: ENA fell to ~35 KB/s per connection; the AWS Open Data bucket gave 0.4-2 MB/s (anonymous, free)
+    studies: [Thirion_2023A_SCZ]
+    url: "https://sra-pub-run-odp.s3.amazonaws.com/sra/{run}/{run}"
+    bin: ~/micromamba/envs/scz-sra/bin/fastq-dump   # scripts/setup_sratools.sh
+    timeout_s: 240                     # normal read ~2 min; some runs (e.g. ERR8262894) hang: 1,000 reads took 323 s / 227 MB
+    tries: 1                           # a run that hangs once hangs again -> straight to the ENA FASTQ
+    # Only runs whose accession starts with these use AWS. 28 Oct 00:20: 7 of 7 ERR8262940+ runs hit the 4-min kill
+    # (fastq-dump pulls 100s of MB for their first reads); ERR821 was as bad in a test (20 k reads: 111 s, 26 MB).
+    # ERR161 (all already done) read cleanly. The rest go straight to ENA, which scales with parallel connections.
+    run_prefixes: [ERR161]
+  wait_for_tools_min: 240              # at start, wait up to this long for the MetaPhlAn index to finish building
+  sub_dir: data/subsample              # transient subsampled + host-removed reads (deleted per sample)
+  state_dir: data/profile_state
+  profile_dir: results/profiles
+  qc_flags:                            # red flags (team runbook "Shotgun Metagenomics to MetaPhlAn 3", Phase 5)
+    min_species: 10                    # fewer species rows: almost nothing mapped / wrong sample type
+    max_host_fraction: 0.05            # far above a few % for stool: wrong host index or not stool
+    min_clean_frac_of_subsample: 0.5   # fastp + host removal kept < half the subsample: bad reads
+  metaphlan_db_mirror: https://zenodo.org/records/3957592/files/mpa_v30_CHOCOPhlAn_201901.tar  # if cibio drops it
+  metaphlan:
+    path_prepend: ~/micromamba/envs/scz-mpa3/bin
+    bowtie2db: ~/scz-ref/mpa3
+    index: mpa_v30_CHOCOPhlAn_201901
+    args: "--unknown_estimation"       # MetaPhlAn 3 name (MetaPhlAn 4: --unclassified_estimation); row 'UNKNOWN'
+
+tools:
+  # Where fastp/bowtie2 run. 'wsl' = Windows host, tools inside a WSL distro; 'native' = Linux/macOS shell.
+  runner: wsl
+  wsl_distro: Ubuntu
+  # Prepended to PATH inside the runner (micromamba env made by scripts/setup_wsl_tools.sh).
+  path_prepend: ~/micromamba/envs/scz-qc/bin
+  threads: 8
+  # Bowtie2 GRCh38 index *inside* WSL ext4 (fast, permanent). Transient FASTQs stay on the Windows
+  # side (/mnt/c/...) because space freed inside the WSL virtual disk is not returned to C:.
+  host_index: ~/scz-ref/GRCh38_noalt_as          # the zip has no top-level folder: files sit directly in ~/scz-ref
+  bowtie2_args: "--very-sensitive"
+  fastp:
+    common: "--length_required 50"
+    ILLUMINA_PAIRED: "--detect_adapter_for_pe"
+    BGISEQ_PAIRED: "--adapter_sequence AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA --adapter_sequence_r2 AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG"
+    BGISEQ_SINGLE: "--adapter_sequence AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA"
+    ION_TORRENT_SINGLE: "--disable_trim_poly_g"   # variable-length reads; length filter from `common`
+    ILLUMINA_SINGLE: ""
+
+report:
+  # FR-9 / acceptance criterion 4: a documented reason for each study whose filtered counts differ from Table S1
+  # by more than the tolerance. Evidence: docs/discovery.md, docs/phase3b.md.
+  count_notes:
+    Li_2023_SCZ: >-
+      No per-sample BMI is published (GSA attributes and the paper's supplement mmc1.docx give group means
+      only: SZ 23.1 +/- 3.1), so the BMI filter removes no one. The unclassified filter is
+      skipped (MetaPhlAn 3 UNKNOWN is not comparable to the MetaPhlAn 4 cut-off). GutMIND's extra removals
+      most likely came from these two filters.
+    Xu_2020_SCZ: >-
+      Depth uses the exact raw read counts of the paper's Supplementary Table 1 x the fraction our fastp +
+      bowtie2 kept. Two samples fall below 10 M: CNS0063952 (SCZ39, 7.3 M; the paper's own QC gives 6.9 M)
+      and CNS0063922 (SCZ08, 9.9 M; borderline, the paper's QC kept 10.9 M, so GutMIND probably kept it).
+      BMI is NA for every shotgun sample in the supplement, so the BMI filter removes no one.
+    Zhu_2020A_SCZ: >-
+      Profiles come from curatedMetagenomicData, which has no unclassified estimate; GutMIND's 2 + 2 removals
+      are most likely its unclassified filter. BMI is published and none is > 30.
+    Zhu_2020B_SCZ: >-
+      The unclassified filter is skipped; GutMIND removed 1 HC + 1 SCZ, most likely there.
+    Thirion_2023A_SCZ: >-
+      The public control projects (PRJEB41786, PRJEB41787) hold 257 controls; the paper used 132 and Table S1
+      lists 174 raw, with no published list of which. Per-sample BMI is not published (SCZ mean BMI 35), so
+      GutMIND's BMI > 30 filter, which explains most of 132 -> 47 SCZ, cannot be applied. All 389 public
+      samples are kept and the gap is reported, not forced (agreed fallback, 25 Oct 2026).
+  skipped_studies:
+    Vasileva_2024_SCZ: >-
+      Data are in the University of Queensland Research Data Manager (RDM), not a public archive; an access
+      request is needed. The pipeline reads data/manual/Vasileva_2024_SCZ/ when the files arrive.

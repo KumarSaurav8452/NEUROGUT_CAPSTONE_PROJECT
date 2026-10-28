@@ -1,0 +1,24 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/saurav/micromamba/envs/scz-mpa3/bin/metaphlan /tmp/tmp.ChhjZJOu4I/w/Li_2023_SCZ__SAMC445006.hr.R1.fq.gz,/tmp/tmp.ChhjZJOu4I/w/Li_2023_SCZ__SAMC445006.hr.R2.fq.gz --input_type fastq --bowtie2db /home/saurav/scz-ref/mpa3 --index mpa_v30_CHOCOPhlAn_201901 --nproc 8 --unknown_estimation --bowtie2out /tmp/tmp.ChhjZJOu4I/w/Li_2023_SCZ__SAMC445006.bt2.bz2 -o /tmp/tmp.ChhjZJOu4I/w/Li_2023_SCZ__SAMC445006.profile.txt
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+UNKNOWN	-1	61.30979	
+k__Bacteria	2	38.69020651399106	
+k__Bacteria|p__Bacteroidetes	2|976	38.55785118652735	
+k__Bacteria|p__Firmicutes	2|1239	0.132355327463712	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia	2|976|200643	38.55785118652735	
+k__Bacteria|p__Firmicutes|c__Clostridia	2|1239|186801	0.132355327463712	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales	2|976|200643|171549	38.55785118652735	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales	2|1239|186801|186802	0.132355327463712	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae	2|976|200643|171549|171552	38.55785118652735	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae	2|1239|186801|186802|541000	0.10552753826691061	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Oscillospiraceae	2|1239|186801|186802|216572	0.026823920176150002	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella	2|976|200643|171549|171552|838	38.55785118652735	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium	2|1239|186801|186802|541000|216851	0.10552753826691061	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Oscillospiraceae|g__Oscillibacter	2|1239|186801|186802|216572|459786	0.026823920176150002	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_copri	2|976|200643|171549|171552|838|165179	32.58230742028813	k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp,k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp_TF12_30,k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_copri_CAG_164
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp_CAG_520	2|976|200643|171549|171552|838|1262929	4.661647567147984	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp_AM42_24	2|976|200643|171549|171552|838|2293125	1.1567172351281394	
+k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_stercorea	2|976|200643|171549|171552|838|363265	0.15717896396308867	k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_stercorea_CAG_629
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium|s__Faecalibacterium_prausnitzii	2|1239|186801|186802|541000|216851|853	0.10552753826691061	k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_sp
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Oscillospiraceae|g__Oscillibacter|s__Oscillibacter_sp_57_20	2|1239|186801|186802|216572|459786|1897011	0.026823920176150002	

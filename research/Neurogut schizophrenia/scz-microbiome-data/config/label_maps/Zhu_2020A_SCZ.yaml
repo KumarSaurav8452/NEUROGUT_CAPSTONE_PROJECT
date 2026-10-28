@@ -1,0 +1,24 @@
+# Zhu et al. 2020, Nat Commun 11:1612 - discovery cohort (Illumina runs of CNP0000119).
+# Archive metadata has no group field; labels come from Supplementary Data 1 (docs/discovery.md §3b).
+study_id: Zhu_2020A_SCZ
+rules:
+  - field: sample_title
+    match: '^medication$'
+    group: Exclude
+    reason: post-treatment follow-up sample
+  - supplement:
+      file: data/supplements/Zhu2020_NatCommun_SuppData1.xlsx
+      header_row: 4
+      key: BGI ID                     # == CNGB sample_name (wHAXPI...)
+      join_on: sample_name
+      group_column: Group
+      groups: {HC: Healthy, SCZ: SCZ}
+      columns:
+        age: Age
+        sex: "Gender (1:male, 2:female)"
+        bmi: BMI
+        diagnosis_detail: Diagnosis   # healthy / first-episode / relapse
+      sex_codes: {1: male, 2: female}
+default:
+  group: Exclude
+  reason: not in Zhu 2020 Supplementary Data 1

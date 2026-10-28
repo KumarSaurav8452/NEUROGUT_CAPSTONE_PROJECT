@@ -1,0 +1,35 @@
+# Xu et al. 2020, Brain Behav Immun 85:120-127. CNGB CNP0000401.
+# Disease-only cohort (Table S1: 0 controls): every shotgun run is a patient.
+# The project also holds an unrelated 16S sub-study (docs/discovery.md §2.2).
+study_id: Xu_2020_SCZ
+rules:
+  - field: library_strategy
+    match: '^AMPLICON$'
+    group: Exclude
+    reason: 16S amplicon sub-study (not shotgun; group unknown)
+  # Supplementary Table 1 (mmc2.xlsx, sheet ST1): per-sample age, sex and exact raw read counts for the 40
+  # shotgun patients. BMI is NA for all of them. The paper renames samples: CNGB wmb-(62+k) == ST1 SCZk.
+  # Verified 28 Oct 2026: correlation 0.998 with our file-size estimates (offsets 61/63: 0.12), and SCZ39 =
+  # 7,661,814 raw reads = the exact count of CNS0063952 (wmb-101) from a whole-sample stream run.
+  - supplement:
+      file: data/supplements/Xu2020_BrainBehavImmun_mmc2.xlsx
+      sheet: ST1
+      header_row: 1
+      filter: {Sequencing method: shotgun, Group: SCZ}
+      key: Name
+      join_on: sample_name
+      key_transform: {regex: '^wmb-([0-9]+)$', format: 'SCZ{:02d}', offset: -62}
+      group_column: Group
+      groups: {SCZ: SCZ}
+      columns:
+        age: Age
+        sex: Gender
+        bmi: BMI
+        published_reads: raw reads      # single reads (150 nt x count = 'raw sequences')
+      sex_codes: {M: male, F: female}
+  - field: library_strategy
+    match: '^WGS$'
+    group: SCZ
+default:
+  group: Exclude
+  reason: unexpected library_strategy

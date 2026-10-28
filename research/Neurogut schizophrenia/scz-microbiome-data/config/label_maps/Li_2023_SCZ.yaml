@@ -1,0 +1,17 @@
+# Li et al. 2023, Schizophr Res 255:59-66. GSA CRA004772.
+# Labels are in the GSA sample sheet, `Sample title` (docs/discovery.md §2.1).
+study_id: Li_2023_SCZ
+rules:
+  - field: sample_title
+    match: '^HC$'
+    group: Healthy
+  - field: sample_title
+    match: '^SZ/0w$'
+    group: SCZ
+  - field: sample_title
+    match: '^(4w|8w)$'
+    group: Exclude
+    reason: non-baseline timepoint (treatment follow-up 4w/8w)
+default:
+  group: Exclude
+  reason: unmapped sample_title

@@ -1,8 +1,9 @@
 """
-NEUROGUT -- ORM Models  (v2.0)
-=================================
+NEUROGUT -- ORM Models  (v2.0 / v4.0)
+=======================================
 Original 6 tables + 3 new v2.0 tables (AuditLog, Alert, CohortBenchmark).
 Prediction table extended with confidence interval columns.
+v4.0: User table extended with status, invite_token_hash, invite_expires_at.
 """
 
 import uuid
@@ -49,10 +50,14 @@ class User(Base):
     id = Column(String(36), primary_key=True, default=_uuid)
     hospital_id = Column(String(36), ForeignKey("hospitals.id", ondelete="CASCADE"), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    password_hash = Column(Text, nullable=False)
+    password_hash = Column(Text, nullable=True)   # nullable: invited users have no password yet
     role = Column(String(20), nullable=False)  # admin, clinician, researcher
     full_name = Column(String(255), default="")
     is_active = Column(Boolean, default=True)
+    # v4.0: user lifecycle status
+    status = Column(String(20), nullable=False, default="active")  # invited, active, deactivated
+    invite_token_hash = Column(Text, nullable=True)   # bcrypt hash of raw invite token
+    invite_expires_at = Column(DateTime, nullable=True)  # 72-hour expiry
     last_login_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=_now)
 
@@ -237,3 +242,28 @@ class CohortBenchmark(Base):
     p75_value = Column(Float, nullable=False, default=0.0)
     computed_at = Column(DateTime, default=_now)
 
+
+
+# ---------------------------------------------------------------------------
+# NeuroGut v2: Parkinson's / schizophrenia predictions (one table for both diseases)
+# ---------------------------------------------------------------------------
+class V2Prediction(Base):
+    __tablename__ = "v2_predictions"
+
+    id = Column(String(36), primary_key=True, default=_uuid)
+    hospital_id = Column(String(36), ForeignKey("hospitals.id", ondelete="CASCADE"), nullable=False)
+    patient_id = Column(String(36), ForeignKey("patients.id", ondelete="SET NULL"), nullable=True)
+    submitted_by = Column(String(36), ForeignKey("users.id"), nullable=True)
+    disease = Column(String(10), nullable=False)          # scz, pd
+    sample_label = Column(String(100), default="")         # patient code / sample name from the upload
+    collection_date = Column(String(10), nullable=True)
+    input_method = Column(String(20), nullable=False, default="manual")  # manual, csv_upload, profile_upload
+    abundances_json = Column(JSON, default=dict)            # model taxa -> % relative abundance
+    probability = Column(Float, nullable=False)
+    label = Column(SmallInteger, nullable=False)            # 1 = disease-like profile
+    risk_tier = Column(String(20), nullable=False)          # low, moderate, high
+    model_probs_json = Column(JSON, default=dict)
+    drivers_json = Column(JSON, default=list)
+    missing_taxa = Column(SmallInteger, default=0)
+    model_version = Column(String(30), nullable=False, default="v2.0-deploy")
+    created_at = Column(DateTime, default=_now)

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# stub: count input reads, pass them through to stdout (interleaved for PE), write the json summary
+set -euo pipefail
+in1=""; in2=""; json=""
+while [ $# -gt 0 ]; do case "$1" in -i) in1=$2; shift;; -I) in2=$2; shift;; -j) json=$2; shift;; --version) echo "fastp 0.23.2-stub"; exit 0;; esac; shift; done
+if [ -n "$in2" ]; then paste <(zcat "$in1" | paste - - - -) <(zcat "$in2" | paste - - - -) | tr '\t' '\n'; n=$(( $(zcat "$in1" | wc -l) / 2 )); else zcat "$in1"; n=$(( $(zcat "$in1" | wc -l) / 4 )); fi
+echo "{\"summary\":{\"before_filtering\":{\"total_reads\":$n},\"after_filtering\":{\"total_reads\":$n}}}" > "$json"

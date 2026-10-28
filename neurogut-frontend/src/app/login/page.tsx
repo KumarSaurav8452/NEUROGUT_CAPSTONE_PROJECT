@@ -1,4 +1,5 @@
 "use client";
+import { homeRoute } from "@/lib/version";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -19,7 +20,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push("/dashboard");
+      router.push(homeRoute());
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -51,7 +52,7 @@ export default function LoginPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
           <div style={{
             width: 44, height: 44, borderRadius: 12,
-            background: "linear-gradient(135deg, #006D77, #00A3B5)",
+            background: "linear-gradient(135deg, #0047AB, #0F9D8A)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <FlaskConical size={22} color="white" />

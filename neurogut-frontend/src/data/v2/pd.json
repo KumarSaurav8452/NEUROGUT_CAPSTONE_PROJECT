@@ -1,0 +1,161 @@
+{
+ "generated": "28 Oct 2026 23:53",
+ "source": "research/Neurogut schizophrenia/external_repos/pd_repo (branch upload-pd-neurogut-files)",
+ "n_samples": 724,
+ "n_pd": 490,
+ "n_control": 234,
+ "nested_cv": [
+  {
+   "model": "CatBoost",
+   "roc_auc": 0.787,
+   "pr_auc": 0.891,
+   "f1": 0.822,
+   "roc_auc_sd": 0.023,
+   "pr_auc_sd": 0.014,
+   "f1_sd": 0.015
+  },
+  {
+   "model": "Random Forest",
+   "roc_auc": 0.77,
+   "pr_auc": 0.879,
+   "f1": 0.823,
+   "roc_auc_sd": 0.016,
+   "pr_auc_sd": 0.012,
+   "f1_sd": 0.018
+  },
+  {
+   "model": "XGBoost",
+   "roc_auc": 0.775,
+   "pr_auc": 0.886,
+   "f1": 0.813,
+   "roc_auc_sd": 0.031,
+   "pr_auc_sd": 0.022,
+   "f1_sd": 0.013
+  }
+ ],
+ "ablations": {
+  "Genus, full pipeline (v5)": [
+   {
+    "model": "CatBoost",
+    "roc_auc": 0.787,
+    "roc_auc_sd": 0.023
+   },
+   {
+    "model": "Random Forest",
+    "roc_auc": 0.77,
+    "roc_auc_sd": 0.016
+   },
+   {
+    "model": "XGBoost",
+    "roc_auc": 0.775,
+    "roc_auc_sd": 0.031
+   }
+  ],
+  "Covariates only": [
+   {
+    "model": "CatBoost",
+    "roc_auc": 0.756,
+    "roc_auc_sd": 0.031
+   },
+   {
+    "model": "Random Forest",
+    "roc_auc": 0.766,
+    "roc_auc_sd": 0.035
+   },
+   {
+    "model": "XGBoost",
+    "roc_auc": 0.748,
+    "roc_auc_sd": 0.037
+   }
+  ],
+  "Constipation dropped": [
+   {
+    "model": "CatBoost",
+    "roc_auc": 0.759,
+    "roc_auc_sd": 0.022
+   },
+   {
+    "model": "Random Forest",
+    "roc_auc": 0.747,
+    "roc_auc_sd": 0.03
+   },
+   {
+    "model": "XGBoost",
+    "roc_auc": 0.741,
+    "roc_auc_sd": 0.021
+   }
+  ],
+  "Species level": [
+   {
+    "model": "CatBoost",
+    "roc_auc": 0.79,
+    "roc_auc_sd": 0.035
+   },
+   {
+    "model": "Random Forest",
+    "roc_auc": 0.788,
+    "roc_auc_sd": 0.027
+   },
+   {
+    "model": "XGBoost",
+    "roc_auc": 0.783,
+    "roc_auc_sd": 0.027
+   }
+  ],
+  "Pathways collapsed": [
+   {
+    "model": "CatBoost",
+    "roc_auc": 0.783,
+    "roc_auc_sd": 0.03
+   },
+   {
+    "model": "Random Forest",
+    "roc_auc": 0.774,
+    "roc_auc_sd": 0.024
+   },
+   {
+    "model": "XGBoost",
+    "roc_auc": 0.775,
+    "roc_auc_sd": 0.02
+   }
+  ]
+ },
+ "constipation_strata": [
+  {
+   "stratum": "Constipated",
+   "model": "CatBoost",
+   "roc_auc": 0.727
+  },
+  {
+   "stratum": "Constipated",
+   "model": "Random Forest",
+   "roc_auc": 0.635
+  },
+  {
+   "stratum": "Constipated",
+   "model": "XGBoost",
+   "roc_auc": 0.72
+  },
+  {
+   "stratum": "Non-constipated",
+   "model": "CatBoost",
+   "roc_auc": 0.72
+  },
+  {
+   "stratum": "Non-constipated",
+   "model": "Random Forest",
+   "roc_auc": 0.703
+  },
+  {
+   "stratum": "Non-constipated",
+   "model": "XGBoost",
+   "roc_auc": 0.696
+  }
+ ],
+ "reported": {
+  "internal_auc": 0.699,
+  "external_auc": 0.619,
+  "elasticnet_external_auc": 0.661,
+  "model": "frozen microbiome-only ensemble"
+ }
+}

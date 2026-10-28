@@ -1,4 +1,5 @@
 "use client";
+import { homeRoute } from "@/lib/version";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -9,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading) {
-      router.replace(user ? "/dashboard" : "/login");
+      router.replace(user ? homeRoute() : "/login");
     }
   }, [user, loading, router]);
 

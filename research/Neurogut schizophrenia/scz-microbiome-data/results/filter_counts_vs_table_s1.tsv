@@ -1,0 +1,11 @@
+study_id	group	expected_filtered	obtained	diff	status	status_if_final	pending_filters	skipped_filters
+Li_2023_SCZ	Healthy	30	36	6	FAIL	FAIL		unclassified
+Li_2023_SCZ	SCZ	17	19	2	WARN	WARN		unclassified
+Xu_2020_SCZ	Healthy	0	0	0	PASS	PASS		unclassified
+Xu_2020_SCZ	SCZ	39	38	-1	WARN	WARN		unclassified
+Zhu_2020A_SCZ	Healthy	79	81	2	WARN	WARN		unclassified
+Zhu_2020A_SCZ	SCZ	88	90	2	WARN	WARN		unclassified
+Zhu_2020B_SCZ	Healthy	43	44	1	WARN	WARN		unclassified
+Zhu_2020B_SCZ	SCZ	44	45	1	WARN	WARN		unclassified
+Thirion_2023A_SCZ	Healthy	53	257	204	FAIL	FAIL		bmi;unclassified
+Thirion_2023A_SCZ	SCZ	47	132	85	FAIL	FAIL		bmi;unclassified

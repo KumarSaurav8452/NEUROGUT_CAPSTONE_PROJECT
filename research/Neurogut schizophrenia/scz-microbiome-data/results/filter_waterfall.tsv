@@ -1,0 +1,31 @@
+study_id	step	name	description	status	removed_healthy	removed_scz	removed_unlabelled	remaining_healthy	remaining_scz	note
+Li_2023_SCZ	1	shotgun	keep shotgun metagenomic runs	applied	0	0	0	36	19	
+Li_2023_SCZ	2	platform	keep runs on the study platform	applied	0	0	0	36	19	single-platform study
+Li_2023_SCZ	3	baseline	drop non-baseline / non-human / unlabelled samples; merge runs per sample	applied	0	0	21	36	19	
+Li_2023_SCZ	4	bmi	drop BMI > 30 (NA kept)	no-op	0	0	0	36	19	no BMI available for this study (NA kept)
+Li_2023_SCZ	5	depth	drop < 10,000,000 reads after QC + host removal	applied	0	0	0	36	19	
+Li_2023_SCZ	6	unclassified	drop > 30% unclassified at species level	skipped	0	0	0	36	19	30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable
+Xu_2020_SCZ	1	shotgun	keep shotgun metagenomic runs	applied	0	0	88	0	40	88 non-shotgun samples flagged
+Xu_2020_SCZ	2	platform	keep runs on the study platform	applied	0	0	0	0	40	single-platform study
+Xu_2020_SCZ	3	baseline	drop non-baseline / non-human / unlabelled samples; merge runs per sample	applied	0	0	0	0	40	
+Xu_2020_SCZ	4	bmi	drop BMI > 30 (NA kept)	no-op	0	0	0	0	40	no BMI available for this study (NA kept)
+Xu_2020_SCZ	5	depth	drop < 10,000,000 reads after QC + host removal	applied	0	2	0	0	38	
+Xu_2020_SCZ	6	unclassified	drop > 30% unclassified at species level	skipped	0	0	0	0	38	30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable
+Zhu_2020A_SCZ	1	shotgun	keep shotgun metagenomic runs	applied	0	0	0	81	90	
+Zhu_2020A_SCZ	2	platform	keep runs on the study platform	applied	0	0	0	81	90	split on ILLUMINA (applied at fetch; re-checked)
+Zhu_2020A_SCZ	3	baseline	drop non-baseline / non-human / unlabelled samples; merge runs per sample	applied	0	0	38	81	90	
+Zhu_2020A_SCZ	4	bmi	drop BMI > 30 (NA kept)	applied	0	0	0	81	90	
+Zhu_2020A_SCZ	5	depth	drop < 10,000,000 reads after QC + host removal	applied	0	0	0	81	90	
+Zhu_2020A_SCZ	6	unclassified	drop > 30% unclassified at species level	skipped	0	0	0	81	90	30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable
+Zhu_2020B_SCZ	1	shotgun	keep shotgun metagenomic runs	applied	0	0	0	45	45	
+Zhu_2020B_SCZ	2	platform	keep runs on the study platform	applied	0	0	0	45	45	split on BGISEQ (applied at fetch; re-checked)
+Zhu_2020B_SCZ	3	baseline	drop non-baseline / non-human / unlabelled samples; merge runs per sample	applied	0	0	58	45	45	
+Zhu_2020B_SCZ	4	bmi	drop BMI > 30 (NA kept)	applied	1	0	0	44	45	2 kept with BMI NA
+Zhu_2020B_SCZ	5	depth	drop < 10,000,000 reads after QC + host removal	applied	0	0	0	44	45	
+Zhu_2020B_SCZ	6	unclassified	drop > 30% unclassified at species level	skipped	0	0	0	44	45	30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable
+Thirion_2023A_SCZ	1	shotgun	keep shotgun metagenomic runs	applied	0	0	0	257	132	
+Thirion_2023A_SCZ	2	platform	keep runs on the study platform	applied	0	0	0	257	132	single-platform study
+Thirion_2023A_SCZ	3	baseline	drop non-baseline / non-human / unlabelled samples; merge runs per sample	applied	0	0	0	257	132	237 kept samples have >1 run, merged
+Thirion_2023A_SCZ	4	bmi	drop BMI > 30 (NA kept)	skipped	0	0	0	257	132	per-sample BMI not published (study_overrides.bmi_filter: false)
+Thirion_2023A_SCZ	5	depth	drop < 10,000,000 reads after QC + host removal	applied	0	0	0	257	132	
+Thirion_2023A_SCZ	6	unclassified	drop > 30% unclassified at species level	skipped	0	0	0	257	132	30% cut-off is calibrated for MetaPhlAn 4; MetaPhlAn 3 UNKNOWN fraction is not comparable

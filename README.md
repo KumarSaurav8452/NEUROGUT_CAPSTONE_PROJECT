@@ -53,3 +53,20 @@ Then visit:
 | Depression F1 | 0.933 |
 | Anxiety F1 | 0.862 |
 | Hamming Loss | 0.086 |
+
+## Website versions (toggle)
+The sidebar has a **Classic | NeuroGut v2** switch:
+- **Classic:** the Depression & Anxiety platform above (`/dashboard`).
+- **NeuroGut v2:** Parkinson's disease and schizophrenia (`/v2`).
+  - **Predictions:** New Prediction (typed values, a CSV, or a MetaPhlAn profile) and Prediction History.
+  - **Research findings:** Overview, Schizophrenia, Parkinson's and Methods.
+  - **Models:** `neurogut-backend/models/v2/`. Rebuild them with `python -m sczml.deploy` in `research/Neurogut schizophrenia/scz-ml`, with `PYTHONPATH=src`.
+  - **Demo uploads:** `data/v2_examples/`.
+
+v2 reads static JSON in `neurogut-frontend/src/data/v2/`. To refresh it after retraining:
+```bash
+python scripts/export_v2_data.py
+```
+- Spec: `PRD_Website_v2.md`.
+- Research code: `research/Neurogut schizophrenia/` holds the SCZ data pipeline, `scz-ml` (`run_all.bat`) and the PD repo clone. Large data in that folder is git-ignored.
+- Local start: run `start_backend.bat` and `start_frontend.bat`.

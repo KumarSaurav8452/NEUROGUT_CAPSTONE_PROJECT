@@ -1,0 +1,3 @@
+sample_id	study_id	group	instrument_platform	library_layout	n_runs	raw_reads	clean_reads	host_removed_reads	host_fraction	clean_files	finished_at
+Thirion_2023A_SCZ__SAMEA121025472	Thirion_2023A_SCZ	Healthy	ION_TORRENT	SINGLE	1	15822701	15328422	15328081	2.2e-05		2026-10-26T01:49:34+00:00
+Xu_2020_SCZ__CNS0063952	Xu_2020_SCZ	SCZ	ILLUMINA	PAIRED	1	7661814	7368604	7367008	0.000217		2026-10-26T00:06:43+00:00

@@ -1,0 +1,28 @@
+# Zhu et al. 2020, Nat Commun 11:1612 - validation cohort (BGISEQ runs of CNP0000119).
+# Labels from Supplementary Data 9, table 9a (rows 3-93; table 9b below it is sequencing stats).
+study_id: Zhu_2020B_SCZ
+rules:
+  - field: sample_title
+    match: '^FMT mice$'
+    group: Exclude
+    reason: mouse FMT recipient (non-human)
+  - field: sample_title
+    match: '^donor$'
+    group: Exclude
+    reason: FMT donor (not part of the validation cohort)
+  - supplement:
+      file: data/supplements/Zhu2020_NatCommun_SuppData9.xlsx
+      header_row: 3
+      last_row: 93
+      key: Samples ID                 # == CNGB sample_name (CL1000..._L0#_###)
+      join_on: sample_name
+      group_column: Group
+      groups: {HC: Healthy, SCZ: SCZ}
+      columns:
+        age: Age
+        sex: "Gender (1:male, 2:female)"
+        bmi: BMI
+      sex_codes: {1: male, 2: female}
+default:
+  group: Exclude
+  reason: not in Zhu 2020 Supplementary Data 9a

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# stub: read all reads from stdin, call none host, write them to --un-conc-gz / --un-gz, print a bowtie2-style summary
+set -euo pipefail
+paired=0; un=""
+while [ $# -gt 0 ]; do case "$1" in --interleaved) paired=1;; --un-conc-gz|--un-gz) un=$2; shift;; --version) echo "bowtie2-align-s version 2.5.3-stub"; exit 0;; esac; shift; done
+tmp=$(mktemp); cat > "$tmp"; lines=$(wc -l < "$tmp")
+if [ $paired = 1 ]; then p=$(( lines / 8 ))
+  if [ -n "$un" ]; then paste - - - - - - - - < "$tmp" | cut -f1-4 | tr '\t' '\n' | gzip > "${un/\%/1}"; paste - - - - - - - - < "$tmp" | cut -f5-8 | tr '\t' '\n' | gzip > "${un/\%/2}"; fi
+  printf "%d reads; of these:\n  %d (100.00%%) were paired; of these:\n    %d (100.00%%) aligned concordantly 0 times\n" $p $p $p >&2
+else r=$(( lines / 4 )); [ -n "$un" ] && gzip < "$tmp" > "$un"
+  printf "%d reads; of these:\n  %d (100.00%%) were unpaired; of these:\n    %d (100.00%%) aligned 0 times\n" $r $r $r >&2
+fi
+rm -f "$tmp"

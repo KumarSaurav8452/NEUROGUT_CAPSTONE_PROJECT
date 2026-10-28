@@ -1,0 +1,15 @@
+# Thirion et al. 2023, Biol Psychiatry Glob Open Sci 3:283-291.
+# No group field in sample attributes; the group is given by the ENA project (docs/discovery.md §2.4, §3d):
+#   PRJEB41217 = SCZ (CHANGE trial), PRJEB41786 / PRJEB41787 = healthy Danish controls.
+# Per-sample BMI is not published, so the GutMIND BMI filter cannot be applied (config: bmi_filter: false).
+study_id: Thirion_2023A_SCZ
+rules:
+  - field: source_accession
+    match: '^PRJEB41217$'
+    group: SCZ
+  - field: source_accession
+    match: '^PRJEB4178[67]$'
+    group: Healthy
+default:
+  group: Exclude
+  reason: unexpected source project
