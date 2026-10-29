@@ -705,15 +705,25 @@ body {
 .v2-hero p { margin: 0; opacity: 0.9; font-size: 14px; max-width: 760px; }
 
 .v2-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 16px; }
-.v2-metric { padding: 18px 20px; }
+.v2-metric { padding: 18px 20px; display: flex; flex-direction: column; }
 .v2-metric .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-tertiary); font-weight: 600; }
-.v2-metric .v { font-size: 28px; font-weight: 800; color: var(--primary); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.v2-metric .v { font-size: 30px; line-height: 1.15; font-weight: 800; color: var(--primary); margin-top: 6px; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
 .v2-metric .v.teal { color: var(--accent-dark); }
 .v2-metric .s { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-.v2-section { padding: 18px 20px; margin-bottom: 16px; }
-.v2-section h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
-.v2-section .sub { font-size: 12px; color: var(--text-secondary); margin: 0 0 12px; }
+.v2-section { padding: 20px 22px; margin-bottom: 16px; }
+.v2-section h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary); }
+.v2-section .sub { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); margin: 0 0 14px; max-width: 900px; }
+
+/* v2 tables: compact rows, numbers never split across lines (the table scrolls sideways instead) */
+.v2-section .data-table th { padding: 9px 12px; font-size: 11px; white-space: nowrap; }
+.v2-section .data-table td { padding: 9px 12px; font-size: 13.5px; white-space: nowrap; }
+.v2-section .data-table td:first-child { white-space: normal; min-width: 140px; }
+.v2-section .data-table tbody tr:last-child td { border-bottom: none; }
+
+/* cards that link somewhere lift slightly on hover */
+a.card { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+a.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 71, 171, 0.10); border-color: var(--primary-light); }
 
 .v2-pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 .v2-pill.cobalt { background: var(--primary-light); color: var(--primary); }

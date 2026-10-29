@@ -109,7 +109,10 @@ def template(disease: str, user: User = Depends(get_current_user)):
 def predict(body: V2Input, request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     _bundle_or_404(body.disease)
     patient = _patient(db, user, body.patient_id)
-    pct, missing = predictor_v2.from_named(body.disease, body.abundances)
+    try:
+        pct, missing = predictor_v2.from_named(body.disease, body.abundances)
+    except ValueError as e:
+        raise HTTPException(422, f"Invalid abundances: {e}")
     t0 = time.time()
     result = predictor_v2.predict(body.disease, pct)
     out = _save(db, user, body.disease, pct, missing, result, "manual", patient, body.sample_label, body.collection_date)
@@ -142,6 +145,11 @@ async def predict_csv(request: Request, disease: str = Form(...), file: UploadFi
             if sum(pct.values()) == 0:
                 errors.append({"row": name, "error": "none of the model taxa found in this profile"})
                 continue
+            try:
+                predictor_v2.validate(disease, pct)
+            except ValueError as e:
+                errors.append({"row": name, "error": str(e)})
+                continue
             res = predictor_v2.predict(disease, pct)
             p = fixed or _patient(db, user, code=name)
             results.append(_save(db, user, disease, pct, 0, res, "profile_upload", p, name))
@@ -157,7 +165,11 @@ async def predict_csv(request: Request, disease: str = Form(...), file: UploadFi
             except ValueError as e:
                 errors.append({"row": int(i) + 2, "error": f"non-numeric value ({e})"})
                 continue
-            pct, missing = predictor_v2.from_named(disease, values)
+            try:
+                pct, missing = predictor_v2.from_named(disease, values)
+            except ValueError as e:
+                errors.append({"row": int(i) + 2, "error": str(e)})
+                continue
             if missing == len(pct):
                 errors.append({"row": int(i) + 2, "error": "no model taxa columns found (download the template)"})
                 continue

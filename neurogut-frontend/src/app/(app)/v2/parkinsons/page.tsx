@@ -1,6 +1,7 @@
 "use client";
 import { Microscope } from "lucide-react";
 import pd from "@/data/v2/pd.json";
+import Extras, { type ExtrasData } from "@/components/v2/Extras";
 import { Header, Metric, Section, Table, Bars, Foot, COBALT, TEAL, SERIES, fmt } from "@/components/v2/ui";
 
 type Row = { model: string; roc_auc: number | null; roc_auc_sd?: number | null; pr_auc?: number | null; f1?: number | null };
@@ -37,6 +38,8 @@ export default function ParkinsonsPage() {
           <Table cols={["Stratum", ...models]} rows={[...new Set(strata.map((s) => s.stratum))].map((st) => [
             <b key="s">{st}</b>, ...models.map((m) => fmt(strata.find((s) => s.stratum === st && s.model === m)?.roc_auc))])} />
         </Section>
+
+        <Extras x={pd.extras as ExtrasData} disease="Parkinson's" />
 
         <div className="v2-note">
           <b>PD team conclusion.</b> Species-level features gave small, consistent gains and pointed to SCFA-producing bacteria,

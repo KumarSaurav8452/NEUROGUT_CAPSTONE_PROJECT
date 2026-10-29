@@ -91,3 +91,31 @@ def test_multi_level_and_per_rank_clr():
     from sczml.data import multi_level
     m = multi_level(_frac())
     assert m.shape[1] == 4 + 3 + 3 and np.allclose(clr(m).sum(axis=1), 0)
+
+
+def test_extras_summary_metrics_match_confusion_matrix():
+    """SVM/SHAP report: accuracy, precision, recall and F1 come from one Youden-threshold confusion matrix."""
+    from sczml.extras import summarise
+    y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1])
+    score = np.array([0.1, 0.2, 0.3, 0.8, 0.4, 0.7, 0.9, 0.95])
+    s = summarise(y, [0.9, 0.7], score, np.array(["a", "a", "b", "b", "a", "a", "b", "b"]))
+    c = s["confusion"]
+    assert c["tn"] + c["fp"] + c["fn"] + c["tp"] == len(y)
+    assert s["accuracy"] == round((c["tp"] + c["tn"]) / len(y), 3)
+    assert s["recall"] == round(c["tp"] / (c["tp"] + c["fn"]), 3)
+    assert s["roc_auc"] == 0.8
+    lo, hi = s["roc_auc_ci95"]
+    assert 0.0 <= lo <= hi <= 1.0
+
+
+def test_auc_ci_brackets_the_mean_fold_auc():
+    """The CI is for the reported number (mean of per-fold AUCs), so it must contain it."""
+    from sklearn.metrics import roc_auc_score
+    from sczml.extras import auc_ci
+    rng = np.random.default_rng(0)
+    y = np.tile([0, 1], 150)
+    fold = np.repeat(["a", "b", "c"], 100)
+    score = y * 0.6 + rng.normal(size=300) + np.repeat([0.0, 5.0, -5.0], 100)  # folds on very different scales
+    mean_auc = np.mean([roc_auc_score(y[fold == f], score[fold == f]) for f in "abc"])
+    lo, hi = auc_ci(y, score, fold)
+    assert lo <= mean_auc <= hi

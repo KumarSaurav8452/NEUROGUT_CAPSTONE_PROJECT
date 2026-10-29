@@ -1,0 +1,123 @@
+{
+ "disease": "pd",
+ "n": 724,
+ "n_cases": 490,
+ "external": null,
+ "shap": [
+  {
+   "taxon": "g__Blautia",
+   "mean_abs_shap": 0.4346,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "g__Ruthenibacterium",
+   "mean_abs_shap": 0.3657,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Actinomyces_oris",
+   "mean_abs_shap": 0.2284,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Bifidobacterium_dentium",
+   "mean_abs_shap": 0.2045,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Blautia_wexlerae",
+   "mean_abs_shap": 0.1759,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Clostridium_sp_CAG_299",
+   "mean_abs_shap": 0.1758,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "g__Faecalibacterium",
+   "mean_abs_shap": 0.1744,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Fusicatenibacter_saccharivorans",
+   "mean_abs_shap": 0.1426,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Alistipes_indistinctus",
+   "mean_abs_shap": 0.1406,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Megasphaera",
+   "mean_abs_shap": 0.1378,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "f__Lactobacillaceae",
+   "mean_abs_shap": 0.1289,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Hungatella_hathewayi",
+   "mean_abs_shap": 0.1283,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Acidaminococcus",
+   "mean_abs_shap": 0.1282,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Streptococcus_mutans",
+   "mean_abs_shap": 0.1245,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Agathobaculum_butyriciproducens",
+   "mean_abs_shap": 0.1229,
+   "raises_score_when": "higher"
+  }
+ ],
+ "internal": {
+  "Deployed ensemble (RF + XGB + EN)": {
+   "roc_auc": 0.722,
+   "roc_auc_sd": 0.035,
+   "roc_auc_ci95": [
+    0.682,
+    0.758
+   ],
+   "accuracy": 0.642,
+   "precision": 0.839,
+   "recall": 0.584,
+   "specificity": 0.765,
+   "f1": 0.688,
+   "confusion": {
+    "tn": 179,
+    "fp": 55,
+    "fn": 204,
+    "tp": 286
+   }
+  },
+  "SVM (RBF kernel)": {
+   "roc_auc": 0.717,
+   "roc_auc_sd": 0.021,
+   "roc_auc_ci95": [
+    0.675,
+    0.755
+   ],
+   "accuracy": 0.657,
+   "precision": 0.815,
+   "recall": 0.639,
+   "specificity": 0.697,
+   "f1": 0.716,
+   "confusion": {
+    "tn": 163,
+    "fp": 71,
+    "fn": 177,
+    "tp": 313
+   }
+  }
+ }
+}

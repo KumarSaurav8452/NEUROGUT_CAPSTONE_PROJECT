@@ -1,0 +1,162 @@
+{
+ "disease": "scz",
+ "n": 704,
+ "n_cases": 286,
+ "external": {
+  "Deployed ensemble (RF + XGB + EN)": {
+   "roc_auc": 0.624,
+   "roc_auc_sd": 0.072,
+   "roc_auc_ci95": [
+    0.566,
+    0.677
+   ],
+   "accuracy": 0.631,
+   "precision": 0.54,
+   "recall": 0.612,
+   "specificity": 0.644,
+   "f1": 0.574,
+   "confusion": {
+    "tn": 269,
+    "fp": 149,
+    "fn": 111,
+    "tp": 175
+   }
+  },
+  "SVM (RBF kernel)": {
+   "roc_auc": 0.584,
+   "roc_auc_sd": 0.069,
+   "roc_auc_ci95": [
+    0.526,
+    0.636
+   ],
+   "accuracy": 0.628,
+   "precision": 0.541,
+   "recall": 0.552,
+   "specificity": 0.679,
+   "f1": 0.547,
+   "confusion": {
+    "tn": 284,
+    "fp": 134,
+    "fn": 128,
+    "tp": 158
+   }
+  }
+ },
+ "shap": [
+  {
+   "taxon": "s__Bacteroides_xylanisolvens",
+   "mean_abs_shap": 0.3834,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Bacteroides_stercoris",
+   "mean_abs_shap": 0.3457,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Blautia",
+   "mean_abs_shap": 0.3048,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "f__Coriobacteriaceae",
+   "mean_abs_shap": 0.2432,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "f__Tannerellaceae",
+   "mean_abs_shap": 0.228,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Bacteroides_finegoldii",
+   "mean_abs_shap": 0.2067,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Dialister_sp_CAG_357",
+   "mean_abs_shap": 0.1861,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Parabacteroides_merdae",
+   "mean_abs_shap": 0.1806,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Dialister",
+   "mean_abs_shap": 0.1429,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "g__Bifidobacterium",
+   "mean_abs_shap": 0.1221,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Phascolarctobacterium_succinatutens",
+   "mean_abs_shap": 0.1082,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "s__Collinsella_aerofaciens",
+   "mean_abs_shap": 0.108,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Flavonifractor",
+   "mean_abs_shap": 0.1073,
+   "raises_score_when": "higher"
+  },
+  {
+   "taxon": "g__Phascolarctobacterium",
+   "mean_abs_shap": 0.1073,
+   "raises_score_when": "lower"
+  },
+  {
+   "taxon": "s__Bifidobacterium_longum",
+   "mean_abs_shap": 0.1006,
+   "raises_score_when": "higher"
+  }
+ ],
+ "internal": {
+  "Deployed ensemble (RF + XGB + EN)": {
+   "roc_auc": 0.707,
+   "roc_auc_sd": 0.039,
+   "roc_auc_ci95": [
+    0.666,
+    0.744
+   ],
+   "accuracy": 0.673,
+   "precision": 0.603,
+   "recall": 0.573,
+   "specificity": 0.742,
+   "f1": 0.588,
+   "confusion": {
+    "tn": 310,
+    "fp": 108,
+    "fn": 122,
+    "tp": 164
+   }
+  },
+  "SVM (RBF kernel)": {
+   "roc_auc": 0.71,
+   "roc_auc_sd": 0.032,
+   "roc_auc_ci95": [
+    0.666,
+    0.749
+   ],
+   "accuracy": 0.682,
+   "precision": 0.63,
+   "recall": 0.524,
+   "specificity": 0.789,
+   "f1": 0.573,
+   "confusion": {
+    "tn": 330,
+    "fp": 88,
+    "fn": 136,
+    "tp": 150
+   }
+  }
+ }
+}

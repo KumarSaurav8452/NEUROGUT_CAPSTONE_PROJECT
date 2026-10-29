@@ -16,6 +16,7 @@ import pandas as pd
 
 MODEL_DIR = Path(__file__).resolve().parent.parent / "models" / "v2"
 DISEASES = ("scz", "pd")
+RANK_NAME = {"s": "species", "g": "genus", "f": "family"}
 
 
 def _key(name: str) -> str:
@@ -68,8 +69,30 @@ class PredictorV2:
             if v is None or v == "" or (isinstance(v, float) and np.isnan(v)):
                 missing += 1
                 v = 0.0
-            out[f] = max(float(v), 0.0)
-        return out, missing
+            out[f] = v
+        self.validate(disease, out)
+        return {f: float(v) for f, v in out.items()}, missing
+
+    def validate(self, disease: str, pct: dict) -> None:
+        """Relative abundances must be numbers in 0-100 %, and taxa of one rank cannot add up to more than 100 %."""
+        b = self.get(disease)
+        problems, by_rank = [], {}
+        for f, v in pct.items():
+            name = b["display"][f]
+            try:
+                v = float(v)
+            except (TypeError, ValueError):
+                problems.append(f"{name}: '{v}' is not a number")
+                continue
+            if not np.isfinite(v) or v < 0 or v > 100:
+                problems.append(f"{name}: {v:g} is outside 0-100 %")
+            else:
+                by_rank[name[0]] = by_rank.get(name[0], 0.0) + v
+        for rank, total in by_rank.items():
+            if total > 100.5:
+                problems.append(f"{RANK_NAME.get(rank, rank)} values add up to {total:.1f} % (more than 100 %)")
+        if problems:
+            raise ValueError("; ".join(problems))
 
     def from_profile(self, disease: str, table: pd.DataFrame) -> dict[str, dict[str, float]]:
         """MetaPhlAn table (rows = clades with lineage, columns = samples, values in %) -> per-sample features.

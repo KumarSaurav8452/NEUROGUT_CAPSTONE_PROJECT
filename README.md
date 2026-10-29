@@ -70,3 +70,11 @@ python scripts/export_v2_data.py
 - Spec: `PRD_Website_v2.md`.
 - Research code: `research/Neurogut schizophrenia/` holds the SCZ data pipeline, `scz-ml` (`run_all.bat`) and the PD repo clone. Large data in that folder is git-ignored.
 - Local start: run `start_backend.bat` and `start_frontend.bat`.
+
+## Tests
+- **v2 prediction API** (22 tests, throwaway SQLite database, `db/neurogut.db` is never touched):
+  ```bash
+  cd neurogut-backend && .venv\Scripts\python -m pip install -r requirements-dev.txt && .venv\Scripts\python -m pytest tests/test_v2_api.py -q
+  ```
+- **Research feature code:** `cd "research/Neurogut schizophrenia/scz-ml"`, then `python -m pytest -q tests` with `PYTHONPATH=src`.
+- **SVM baseline + SHAP explanations:** `python -m sczml.extras` in `scz-ml` (with `PYTHONPATH=src`) writes `results/extras/`; then re-run `scripts/export_v2_data.py` to show them on the Schizophrenia and Parkinson's pages.

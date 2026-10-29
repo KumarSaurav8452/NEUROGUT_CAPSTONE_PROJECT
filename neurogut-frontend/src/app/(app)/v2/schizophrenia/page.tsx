@@ -1,12 +1,14 @@
 "use client";
 import { Brain } from "lucide-react";
 import scz from "@/data/v2/scz.json";
+import Extras, { type ExtrasData } from "@/components/v2/Extras";
 import { Header, Metric, Section, Table, Bars, Foot, COBALT, TEAL, fmt, studyLabel } from "@/components/v2/ui";
 
-type Row = { model: string; roc_auc: number | null; roc_auc_sd: number | null; pr_auc: number | null; bal_acc: number | null; f1: number | null };
+type Row = { model: string; roc_auc: number | null; roc_auc_sd: number | null; pr_auc: number | null; bal_acc: number | null; f1: number | null; roc_auc_ci95?: number[] };
+const ci = (c?: number[]) => (c ? `${fmt(c[0], 2)}–${fmt(c[1], 2)}` : "–");
 const modelRows = (rows: Row[]) => rows.map((r) => [
   <b key="m" style={{ color: r.model.startsWith("Ensemble") ? COBALT : undefined }}>{r.model}</b>,
-  `${fmt(r.roc_auc)} ± ${fmt(r.roc_auc_sd, 2)}`, fmt(r.pr_auc), fmt(r.bal_acc), fmt(r.f1),
+  `${fmt(r.roc_auc)} ± ${fmt(r.roc_auc_sd, 2)}`, ci(r.roc_auc_ci95), fmt(r.pr_auc), fmt(r.bal_acc), fmt(r.f1),
 ]);
 
 export default function SchizophreniaPage() {
@@ -34,11 +36,11 @@ export default function SchizophreniaPage() {
         </Section>
 
         <div className="v2-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))" }}>
-          <Section title="Internal benchmarks" sub="Every cohort seen in training (optimistic).">
-            <Table cols={["Model", "ROC-AUC", "PR-AUC", "Bal. acc.", "F1"]} rows={modelRows(scz.internal)} />
+          <Section title="Internal benchmarks" sub="Every cohort seen in training (optimistic). 95% CI: bootstrap of the mean fold AUC (1,000 resamples).">
+            <Table cols={["Model", "ROC-AUC", "95% CI", "PR-AUC", "Bal. acc.", "F1"]} rows={modelRows(scz.internal)} />
           </Section>
           <Section title="New-cohort benchmarks" sub="Train on 3 cohorts, test on the 4th; mean over the 4 (honest estimate).">
-            <Table cols={["Model", "ROC-AUC", "PR-AUC", "Bal. acc.", "F1"]} rows={modelRows(scz.external)} />
+            <Table cols={["Model", "ROC-AUC", "95% CI", "PR-AUC", "Bal. acc.", "F1"]} rows={modelRows(scz.external)} />
           </Section>
         </div>
 
@@ -72,6 +74,8 @@ export default function SchizophreniaPage() {
             <li>The 0.5 threshold under-calls schizophrenia (minority class): F1 and balanced accuracy can improve with a tuned threshold.</li>
           </ul>
         </Section>
+        <Extras x={scz.extras as ExtrasData} disease="schizophrenia" />
+
         <Foot source={scz.source} generated={scz.generated} />
       </div>
     </>
