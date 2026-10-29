@@ -3,9 +3,27 @@ import Link from "next/link";
 import { Sparkles, Brain, Microscope, ArrowRight } from "lucide-react";
 import scz from "@/data/v2/scz.json";
 import pd from "@/data/v2/pd.json";
-import { Header, Metric, Section, Bars, COBALT, TEAL, fmt } from "@/components/v2/ui";
+import { Header, Section, Bars, COBALT, TEAL, fmt } from "@/components/v2/ui";
 
 const ens = (rows: { model: string; roc_auc: number | null }[]) => rows.find((r) => r.model.startsWith("Ensemble"))?.roc_auc ?? null;
+const best = (rows: { roc_auc: number }[]) => Math.max(...rows.map((r) => r.roc_auc));
+
+// One stat card holding the schizophrenia value (cobalt) next to the Parkinson's value (teal)
+function Pair({ k, scz, pd }: { k: string; scz: [string, string]; pd: [string, string] }) {
+  const half = (label: string, [v, s]: [string, string], teal?: boolean) => (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: teal ? TEAL : COBALT }}>{label}</div>
+      <div className={`v ${teal ? "teal" : ""}`}>{v}</div>
+      <div className="s">{s}</div>
+    </div>
+  );
+  return (
+    <div className="card v2-metric">
+      <div className="k">{k}</div>
+      <div style={{ display: "flex", gap: 16 }}>{half("SCHIZOPHRENIA", scz)}{half("PARKINSON'S", pd, true)}</div>
+    </div>
+  );
+}
 
 export default function V2Overview() {
   const sczInt = ens(scz.internal), sczExt = ens(scz.external);
@@ -58,9 +76,15 @@ export default function V2Overview() {
         </Section>
 
         <div className="v2-grid">
-          <Metric k="Study signal (before)" v={fmt(scz.checks.batch_auc, 2)} s="AUC for telling the SCZ cohorts apart: batch effects are strong" />
-          <Metric k="Demographics only" v={fmt(scz.checks.covariate_auc, 2)} s="age + sex + BMI (SCZ, Zhu cohorts)" teal />
-          <Metric k="Models compared" v="8 × 5" s="SCZ preprocessing experiments × models" />
+          <Pair k="Confound check"
+            scz={[fmt(scz.checks.batch_auc, 2), "cohorts told apart: strong batch effect"]}
+            pd={[fmt(best(pd.ablations["Constipation dropped"]), 2), "AUC with constipation removed"]} />
+          <Pair k="Demographics only"
+            scz={[fmt(scz.checks.covariate_auc, 2), "age + sex + BMI (Zhu cohorts)"]}
+            pd={[fmt(best(pd.ablations["Covariates only"]), 2), "age, sex, BMI, constipation, laxatives"]} />
+          <Pair k="Models compared"
+            scz={["8 × 5", "preprocessing experiments × models"]}
+            pd={[`${Object.keys(pd.ablations).length} × ${pd.nested_cv.length}`, "ablations × models"]} />
         </div>
 
         <div className="v2-note">
